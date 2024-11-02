@@ -1,6 +1,10 @@
-#include "configuration.hpp"
+/*
+ * Copyright 2024 <Team 1 UPH IF 2024>
+ */
 
-void increase(const CONFIGURATION &configuration, const std::string &label) {
+#include "../src/configuration.hpp"
+
+void increase(const CONFIGURATION& configuration, const std::string& label) {
     if (label == "Car") {
         configuration.environment.car++;
     } else if (label == "Log") {
@@ -8,7 +12,7 @@ void increase(const CONFIGURATION &configuration, const std::string &label) {
     }
 }
 
-void decrease(const CONFIGURATION &configuration, const std::string &label) {
+void decrease(const CONFIGURATION& configuration, const std::string& label) {
     if (label == "Car") {
         configuration.environment.car--;
     } else if (label == "Log") {
