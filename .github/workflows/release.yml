@@ -25,15 +25,7 @@ jobs:
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: cmake -B build
-
-      - name: Archive
-        run: |
-          tar -czvf ${{ github.ref_name }}.tar.gz --transform 's,^,frogger/,' \
-            src \
-            CMakeLists.txt \
-            LICENSE \
-            README.md
+        run: cmake -B build --target frogger
 
       - name: Draft
         uses: actions/create-release@v1
