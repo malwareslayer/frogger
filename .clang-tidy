@@ -1,0 +1,4 @@
+Checks: '-*,modernize-*'
+WarningsAsErrors: 'modernize-*'
+HeaderFilterRegex: '.*'
+FormatStyle: google
