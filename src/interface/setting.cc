@@ -1,16 +1,18 @@
-#include "setting.hpp"
+/*
+ * Copyright 2024 <Team 1 UPH IF 2024>
+ */
 
-#include "../property.hpp"
-#include "../configuration.hpp"
+#include "../../src/configuration.hpp"
+#include "../../src/property.hpp"
+
+#include "../../src/interface/setting.hpp"
 
 const std::vector<std::string> labeling = {"Car", "Log", "Back"};
 
-void setting(WINDOW *window, const CONFIGURATION &configuration) {
-    constexpr INTERFACE context = {
-        .interface = {
-            .choose = 1,
-        }
-    };
+void setting(WINDOW* window, const CONFIGURATION& configuration) {
+    constexpr INTERFACE context = {.interface = {
+                                       .choose = 1,
+                                   }};
 
     boxes(window, context.interface.choose, labeling);
 
