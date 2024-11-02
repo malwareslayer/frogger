@@ -1,9 +1,13 @@
-#pragma once
+/*
+ * Copyright 2024 <Team 1 UPH IF 2024>
+ */
 
-#include "engine/window.hpp"
+#pragma once
 
 #include <string>
 #include <vector>
+
+#include "../src/engine/window.hpp"
 
 struct PROPERTY {
     mutable int choose;
@@ -14,4 +18,4 @@ struct INTERFACE {
     PROPERTY interface;
 };
 
-std::string choose(WINDOW *window, const PROPERTY &property, const std::vector<std::string> &labels);
+auto choose(WINDOW* window, const PROPERTY& property, const std::vector<std::string>& labels) -> std::string;

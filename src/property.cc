@@ -1,6 +1,10 @@
-#include "property.hpp"
+/*
+ * Copyright 2024 <Team 1 UPH IF 2024>
+ */
 
-std::string choose(WINDOW *window, const PROPERTY &property, const std::vector<std::string> &labels) {
+#include "../src/property.hpp"
+
+auto choose(WINDOW* window, const PROPERTY& property, const std::vector<std::string>& labels) -> std::string {
     const int maximum = static_cast<int>(labels.size());
 
     switch (wgetch(window)) {
@@ -30,5 +34,5 @@ std::string choose(WINDOW *window, const PROPERTY &property, const std::vector<s
             break;
     }
 
-    return std::string { "" };
+    return std::string{""};
 }
