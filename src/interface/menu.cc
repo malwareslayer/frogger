@@ -30,8 +30,6 @@ void menu(const CONFIGURATION &configuration) {
     while (configuration.status.running) {
         if (const std::string choosing = choose(window, context.interface, labeling); choosing == "Play") {
             wclear(window);
-
-            game(window, configuration);
         } else if (choosing == "Setting") {
             wclear(window);
 
