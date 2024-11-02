@@ -1,38 +1,40 @@
-#include "credit.hpp"
+/*
+ * Copyright 2024 <Team 1 UPH IF 2024>
+ */
 
-#include <vector>
+#include "../../src/interface/credit.hpp"
+
 #include <string>
 #include <thread>
+#include <vector>
 
-const std::vector<std::string> labeling = {
-    "Thanks for Playing",
-    "",
-    "Member:",
-    "Dwi Mulia Mokoginta - ",
-    "Ramot Hotland Haposan - ",
-    "Sony Surahman - ",
-    "Sapwages Triziana - ",
-    "Sulaiman Rasyid Dinitra Aziz - ",
-    "",
-    "Engine:",
-    "Dwi Mulia Mokoginta",
-    "",
-    "Game:",
-    "Dwi Mulia Mokoginta",
-    "",
-    "Interface:",
-    "Ramot Hotland Haposan",
-    "Sony Surahman",
-    "",
-    "Utility:",
-    "Sulaiman Rasyid Dinitra Aziz",
-    "",
-    "Mainframe:",
-    "Sapwages Triziana",
-    ""
-};
+const std::vector<std::string> labeling = {"Thanks for Playing",
+                                           "",
+                                           "Member:",
+                                           "Dwi Mulia Mokoginta - ",
+                                           "Ramot Hotland Haposan - ",
+                                           "Sony Surahman - ",
+                                           "Sapwages Triziana - ",
+                                           "Sulaiman Rasyid Dinitra Aziz - ",
+                                           "",
+                                           "Engine:",
+                                           "Dwi Mulia Mokoginta",
+                                           "",
+                                           "Game:",
+                                           "Dwi Mulia Mokoginta",
+                                           "",
+                                           "Interface:",
+                                           "Ramot Hotland Haposan",
+                                           "Sony Surahman",
+                                           "",
+                                           "Utility:",
+                                           "Sulaiman Rasyid Dinitra Aziz",
+                                           "",
+                                           "Mainframe:",
+                                           "Sapwages Triziana",
+                                           ""};
 
-void credit(WINDOW *window, const int &height, const int &width) {
+void credit(WINDOW* window, const int& height, const int& width) {
     wclear(window);
     wrefresh(window);
 
