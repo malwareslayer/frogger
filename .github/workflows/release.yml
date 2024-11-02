@@ -46,22 +46,12 @@ jobs:
           draft: true
           prerelease: false
 
-      - name: Upload Source Code
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.draft.outputs.upload_url }}
-          asset_path: ${{ github.ref_name }}.tar.gz
-          asset_name: ${{ github.ref_name }}.tar.gz
-          asset_content_type: application/gzip
-
       - name: Upload Binary
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.draft.outputs.upload_url }}
-          asset_path: build/${{ github.ref_name }}
+          asset_path: build/${{ github.repository }}
           asset_name: ${{ github.ref_name }}
           asset_content_type: application/octet-stream
