@@ -22,10 +22,10 @@ jobs:
           sudo apt-get install -y cmake build-essential
 
       - name: Configure
-        run: cmake -S . --build build -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: cmake --build build -- VERBOSE=1
+        run: cmake -B build -- VERBOSE=1
 
       - name: Archive
         run: |
