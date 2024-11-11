@@ -8,8 +8,26 @@
 #include <thread>
 #include <vector>
 
-// kosongin dulu suhu mau saya edit
-const std::vector<std::string> labeling = {};
+const std::vector<std::string> labeling = {
+    "Your adventure is our passion. Thank you for being a part of it",
+    "",
+    "Developed by:",
+    "Team I DPKK - Faculty Of Computer Science Of Pelita Harapan University",
+    "",
+    "Advisor",
+    "Robertus Hudi, S.Inf., M.Kom",
+    "",
+    "Team Leader:",
+    "Dwi Mulia Mokoginta",
+    "",
+    "Software Developers:",
+    "Ramot Hotland Haposan ",
+    "Sony Surahman",
+    "Sapwages Triziana ",
+    "Sulaiman Rasyid Dinitra Aziz",
+    "",
+    "Immeasurable thanks to Mr. Robertus Hudi, S.Inf., M.Kom for making everything possible"
+};
 
 void credit(WINDOW* window, const int& height, const int& width) {
     wclear(window);
@@ -28,7 +46,7 @@ void credit(WINDOW* window, const int& height, const int& width) {
 
         refresh();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        std::this_thread::sleep_for(std::chrono::milliseconds(800));
 
         start--;
     }
