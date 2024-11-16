@@ -1,7 +1,7 @@
 #include "../../src/engine/window.hpp"
 
 auto create(const int &y, const int &x, const int &height, const int &width) -> WINDOW * {
-    return newwin(y, x, height, width);
+    return newwin(height, width, y, x);
 }
 
 void boxes(WINDOW *window, const int &highlight, const std::vector<std::string> &choices) {

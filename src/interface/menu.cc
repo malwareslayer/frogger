@@ -5,18 +5,25 @@
 #include "../../src/property.hpp"
 
 #include "../../src/interface/credit.hpp"
+#include "../../src/interface/game.hpp"
 #include "../../src/interface/menu.hpp"
 #include "../../src/interface/setting.hpp"
 
-const std::vector<std::string> labeling = {"Play", "Setting", "Credit", "Exit"};
+#include <thread>
+
+const std::vector<std::string> labeling = {"Single Player", "Multi Player", "Setting", "Credit", "Exit"};
 
 void menu(const CONFIGURATION& configuration) {
-    constexpr INTERFACE context = {.visual = {.y = 10, .x = 30}, .interface = {.choose = 1}};
+    const INTERFACE context = {.visual =
+                                   {
+                                       .y = (getmaxy(stdscr) - 10) / 2,
+                                       .x = (getmaxx(stdscr) - 30) / 2,
+                                       .height = 10,
+                                       .width = 30,
+                                   },
+                               .interface = {.choose = 1}};
 
-    getmaxyx(stdscr, context.visual.height, context.visual.width);
-
-    WINDOW* window = create(context.visual.y, context.visual.x, (context.visual.height - context.visual.y) / 2,
-                            (context.visual.width - context.visual.x) / 2);
+    WINDOW* window = create(context.visual.y, context.visual.x, context.visual.height, context.visual.width);
 
     nodelay(window, true);
     keypad(window, true);
@@ -24,8 +31,14 @@ void menu(const CONFIGURATION& configuration) {
     boxes(window, context.interface.choose, labeling);
 
     while (configuration.status.running) {
-        if (const std::string choosing = choose(window, context.interface, labeling); choosing == "Play") {
+        if (const std::string choosing = choose(window, context.interface, labeling); choosing == "Single Player") {
             wclear(window);
+
+            game(window, configuration);
+        } else if (choosing == "Multi Player") {
+            wclear(window);
+
+            game(window, configuration);
         } else if (choosing == "Setting") {
             wclear(window);
 
@@ -36,12 +49,17 @@ void menu(const CONFIGURATION& configuration) {
             credit(window, context.visual.height, context.visual.width);
         } else if (choosing == "Exit") {
             configuration.status.running = false;
+        } else {
+            wrefresh(window);
         }
+
+        std::this_thread::sleep_for(std::chrono::microseconds(500));
 
         boxes(window, context.interface.choose, labeling);
     }
 
-    clrtoeol();
-    refresh();
-    endwin();
+    wclear(window);
+    wclrtoeol(window);
+    wrefresh(window);
+    delwin(window);
 }

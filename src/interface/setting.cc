@@ -9,9 +9,13 @@
 
 const std::vector<std::string> labeling = {"Car", "Log", "Back"};
 
+#include <thread>
+
 void setting(WINDOW* window, const CONFIGURATION& configuration) {
-    constexpr INTERFACE context = {.interface = {
+    constexpr INTERFACE context = {.visual = {.y = 10, .x = 30},
+                                   .interface = {
                                        .choose = 1,
+
                                    }};
 
     boxes(window, context.interface.choose, labeling);
@@ -23,32 +27,43 @@ void setting(WINDOW* window, const CONFIGURATION& configuration) {
             if (labeling[context.interface.choose - 1] == "Car") {
                 if (configuration.environment.car < 5) {
                     increase(configuration, labeling[context.interface.choose - 1]);
-                    bar(window, configuration.environment.car, 1, 10);
                 }
+
+                bar(window, configuration.environment.car, 1, 10);
             } else if (labeling[context.interface.choose - 1] == "Log") {
                 if (configuration.environment.log < 5) {
                     increase(configuration, labeling[context.interface.choose - 1]);
-                    bar(window, configuration.environment.log, 1, 10);
                 }
+
+                bar(window, configuration.environment.log, 1, 10);
             }
         } else if (choosing == "KEY_LEFT") {
             if (labeling[context.interface.choose - 1] == "Car") {
                 if (configuration.environment.car > 0) {
                     decrease(configuration, labeling[context.interface.choose - 1]);
-                    bar(window, configuration.environment.car, 1, 10);
                 }
+
+                bar(window, configuration.environment.car, 1, 10);
             } else if (labeling[context.interface.choose - 1] == "Log") {
                 if (configuration.environment.log > 0) {
                     decrease(configuration, labeling[context.interface.choose - 1]);
-                    bar(window, configuration.environment.log, 1, 10);
                 }
+
+                bar(window, configuration.environment.log, 1, 10);
             }
         } else {
-            wclear(window);
+            if (labeling[context.interface.choose - 1] == "Car") {
+                bar(window, configuration.environment.car, 1, 10);
+            } else if (labeling[context.interface.choose - 1] == "Log") {
+                bar(window, configuration.environment.log, 1, 10);
+            }
         }
+
+        std::this_thread::sleep_for(std::chrono::microseconds(500));
 
         boxes(window, context.interface.choose, labeling);
     }
 
     wclear(window);
+    wrefresh(window);
 }

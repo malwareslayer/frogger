@@ -15,6 +15,8 @@ auto choose(WINDOW* window, const PROPERTY& property, const std::vector<std::str
                 property.choose = maximum;
             }
 
+            wclear(window);
+
             break;
         case KEY_DOWN:
             property.choose++;
@@ -22,6 +24,8 @@ auto choose(WINDOW* window, const PROPERTY& property, const std::vector<std::str
             if (property.choose > maximum) {
                 property.choose = 1;
             }
+
+            wclear(window);
 
             break;
         case KEY_RIGHT:
