@@ -5,7 +5,6 @@
 #include "../game/symbols/frog.hpp"
 #include "../game/tile.hpp"
 
-#include <iostream>
 #include <sstream>
 #include <thread>
 
@@ -23,11 +22,10 @@ auto symbolize(const std::array<char, 512> &symbol) -> std::vector<std::string> 
     return result;
 }
 
-void render(const INTERFACE &context, const CONFIGURATION &configuration, const TILE &player) {}
-
 void game(WINDOW *parent, const CONFIGURATION &configuration) {
     wclear(parent);
     wrefresh(parent);
+    werase(parent);
 
     const INTERFACE context = {
         .visual =
@@ -44,30 +42,26 @@ void game(WINDOW *parent, const CONFIGURATION &configuration) {
     nodelay(window, true);
     keypad(window, true);
 
-    const TILE player = tile(sprite(LFROG), 15, 15);
+    const SPRITE frog = sprite(LFROG);
+    const TILE player = tile(frog, context.visual.height - frog.height, context.visual.width / 2);
 
-    // std::thread runner(render, context, configuration, player);
+    const std::vector<std::string> symbol = symbolize(player.sprite.symbol);
 
     while (configuration.status.running) {
-        if (const std::string interface = key(window); interface == "q") {
+        if (const std::string interface = keypad(window, context, player); interface == "q") {
             break;
         }
-
-        const std::vector<std::string> symbol = symbolize(player.sprite.symbol);
 
         wclear(window);
 
         for (size_t i = 0; i < symbol.size(); ++i) {
-            mvwprintw(window, (context.visual.height - player.sprite.height) / 2 + i, player.sprite.width, "%s",
-                      symbol[i].c_str());
+            mvwprintw(window, player.board.y + i, player.board.x, "%s", symbol[i].c_str());
         }
 
         wrefresh(window);
 
-        std::this_thread::sleep_for(std::chrono::microseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(7));
     }
-
-    // runner.join();
 
     wclear(window);
     wclrtoeol(window);

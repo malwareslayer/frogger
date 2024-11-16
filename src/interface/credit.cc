@@ -26,8 +26,7 @@ const std::vector<std::string> labeling = {
     "Sapwages Triziana ",
     "Sulaiman Rasyid Dinitra Aziz",
     "",
-    "Immeasurable thanks to Mr. Robertus Hudi, S.Inf., M.Kom for making everything possible"
-};
+    "Immeasurable thanks to Mr. Robertus Hudi, S.Inf., M.Kom for making everything possible"};
 
 void credit(WINDOW* window, const int& height, const int& width) {
     wclear(window);

@@ -11,12 +11,12 @@ void moving(const TILE &tile, const INTERFACE &context, WINDOW *window) {
                 tile.board.y++;
             break;
         case KEY_LEFT:
-            if (tile.board.x > 1)
-                tile.board.x--;
+            if (tile.board.x - tile.sprite.width > 1)
+                tile.board.x++;
             break;
         case KEY_RIGHT:
             if (tile.board.x < context.visual.width - tile.sprite.width)
-                tile.board.x++;
+                tile.board.x--;
             break;
         default:
             break;

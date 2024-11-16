@@ -2,4 +2,7 @@
 
 #include "../engine/window.hpp"
 
-auto key(WINDOW* window) -> std::string;
+#include "../../src/game/tile.hpp"
+#include "../../src/property.hpp"
+
+auto keypad(WINDOW *window, const INTERFACE &context, const TILE &tile) -> std::string;
