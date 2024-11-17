@@ -31,7 +31,7 @@ void menu(const CONFIGURATION& configuration) {
     boxes(window, context.interface.choose, labeling);
 
     while (configuration.status.running) {
-        if (const std::string choosing = choose(window, context.interface, labeling); choosing == "Single Player") {
+        if (const std::string choosing = choose(window, context.interface, labeling); choosing == "Play") {
             wclear(window);
 
             game(window, configuration);
@@ -61,5 +61,6 @@ void menu(const CONFIGURATION& configuration) {
     wclear(window);
     wclrtoeol(window);
     wrefresh(window);
+    werase(window);
     delwin(window);
 }

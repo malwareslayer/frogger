@@ -10,5 +10,11 @@ auto main(int argc, char* argv[]) -> int {
 
     menu({.status = {.running = true}, .environment = {.car = 1, .log = 1}});
 
+    endwin();
+    clear();
+    echo();
+    nocbreak();
+    curs_set(1);
+
     return 0;
 }

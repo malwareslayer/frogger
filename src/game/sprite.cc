@@ -1,6 +1,7 @@
-#include "sprite.hpp"
+#include "../../src/game/sprite.hpp"
 
 #include <algorithm>
+#include <sstream>
 
 struct GEOMETRY {
     mutable int height;
@@ -25,7 +26,21 @@ auto calculate(const std::array<char, 512> &symbol) -> GEOMETRY {
         }
     }
 
-    return GEOMETRY{.height = height, .width = width};
+    return GEOMETRY{.height = height, .width = width / height};
+}
+
+auto symbolize(const std::array<char, 512> &source) -> std::vector<std::string> {
+    const std::string data(source.data());
+    std::istringstream stream(data);
+    std::string line;
+
+    std::vector<std::string> result;
+
+    while (std::getline(stream, line)) {
+        result.push_back(line);
+    }
+
+    return result;
 }
 
 auto sprite(const std::string &data) -> SPRITE {
@@ -36,7 +51,8 @@ auto sprite(const std::string &data) -> SPRITE {
     auto [height, width] = calculate(symbol);
 
     return SPRITE{
-        .symbol = symbol,
+        .source = symbol,
+        .symbol = symbolize(symbol),
         .height = height,
         .width = width,
     };

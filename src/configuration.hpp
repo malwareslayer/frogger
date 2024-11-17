@@ -13,6 +13,7 @@ struct ENVIRONMENT {
 
 struct STATUS {
     mutable bool running;
+    mutable bool play;
 };
 
 struct CONFIGURATION {

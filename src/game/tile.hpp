@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sprite.hpp"
+enum TYPE { TFROG, TCAR, TSEPARATOR };
 
 struct BOARD {
     mutable int y;
@@ -8,8 +8,8 @@ struct BOARD {
 };
 
 struct TILE {
+    TYPE type;
     BOARD board;
-    SPRITE sprite;
 };
 
-auto tile(const SPRITE &sprite, const int &y, const int &x) -> TILE;
+auto tile(const TYPE &type, const int &y, const int &x) -> TILE;
