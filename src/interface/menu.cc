@@ -11,7 +11,7 @@
 
 #include <thread>
 
-const std::vector<std::string> labeling = {"Single Player", "Multi Player", "Setting", "Credit", "Exit"};
+const std::vector<std::string> labeling = {"Play", "Setting", "Credit", "Exit"};
 
 void menu(const CONFIGURATION& configuration) {
     const INTERFACE context = {.visual =
@@ -32,10 +32,6 @@ void menu(const CONFIGURATION& configuration) {
 
     while (configuration.status.running) {
         if (const std::string choosing = choose(window, context.interface, labeling); choosing == "Play") {
-            wclear(window);
-
-            game(window, configuration);
-        } else if (choosing == "Multi Player") {
             wclear(window);
 
             game(window, configuration);
