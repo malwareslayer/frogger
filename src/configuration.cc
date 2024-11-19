@@ -4,7 +4,7 @@
 
 #include "../src/configuration.hpp"
 
-void increase(const CONFIGURATION& configuration, const std::string& label) {
+void increase(const CONFIGURATION &configuration, const std::string &label) {
     if (label == "Car") {
         configuration.environment.car++;
     } else if (label == "Log") {
@@ -12,7 +12,7 @@ void increase(const CONFIGURATION& configuration, const std::string& label) {
     }
 }
 
-void decrease(const CONFIGURATION& configuration, const std::string& label) {
+void decrease(const CONFIGURATION &configuration, const std::string &label) {
     if (label == "Car") {
         configuration.environment.car--;
     } else if (label == "Log") {

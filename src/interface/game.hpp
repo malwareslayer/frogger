@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../engine/window.hpp"
+#include "../../src/configuration.hpp"
+#include "../../src/engine/window.hpp"
 
-#include "../configuration.hpp"
-
-void game(WINDOW *&parent, const CONFIGURATION &configuration);
+void game(WINDOW* &parent, const CONFIGURATION &configuration);

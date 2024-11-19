@@ -6,4 +6,4 @@
 
 #include "../../src/configuration.hpp"
 
-void menu(const CONFIGURATION& configuration);
+void menu(const CONFIGURATION &configuration);

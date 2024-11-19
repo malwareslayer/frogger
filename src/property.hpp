@@ -18,4 +18,4 @@ struct INTERFACE {
     PROPERTY interface;
 };
 
-auto choose(WINDOW* window, const PROPERTY& property, const std::vector<std::string>& labels) -> std::string;
+auto choose(WINDOW *window, const PROPERTY &property, const std::vector<std::string> &labels) -> std::string;

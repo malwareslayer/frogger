@@ -28,27 +28,27 @@ const std::vector<std::string> labeling = {
     "",
     "Immeasurable thanks to Mr. Robertus Hudi, S.Inf., M.Kom for making everything possible"};
 
-void credit(WINDOW* window, const int& height, const int& width) {
+void credit(WINDOW *window, const int &height, const int &width) {
     wclear(window);
     wrefresh(window);
 
     int start = height;
 
     while (start + labeling.size() > 0) {
-        clear();
+        wclear(window);
 
         for (size_t i = 0; i < labeling.size(); ++i) {
             if (const int y = start + static_cast<int>(i); y >= 0 && y < height) {
-                mvprintw(y, (width - static_cast<int>(labeling[i].length())) / 2, "%s", labeling[i].c_str());
+                mvwprintw(window, y, (width - static_cast<int>(labeling[i].length())) / 2, "%s", labeling[i].c_str());
             }
         }
 
-        refresh();
+        wrefresh(window);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(800));
 
         start--;
     }
 
-    wclear(window);
+    werase(window);
 }

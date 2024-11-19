@@ -1,10 +1,10 @@
 #include "../../src/engine/window.hpp"
 
-auto create(const int &y, const int &x, const int &height, const int &width) -> WINDOW * {
+auto create(const int &y, const int &x, const int &height, const int &width) -> WINDOW* {
     return newwin(height, width, y, x);
 }
 
-void boxes(WINDOW *window, const int &highlight, const std::vector<std::string> &choices) {
+void boxes(WINDOW* &window, const int &highlight, const std::vector<std::string> &choices) {
     int y = 3;
 
     box(window, 0, 0);
@@ -26,7 +26,7 @@ void boxes(WINDOW *window, const int &highlight, const std::vector<std::string> 
     wrefresh(window);
 }
 
-void bar(WINDOW *window, const int &data, const int &y, const int &x) {
+void bar(WINDOW* &window, const int &data, const int &y, const int &x) {
     wmove(window, y, x);
     whline(window, ' ', y);
     mvwprintw(window, y, x, "[%-*s] %d/5", 5, std::string(data, '|').c_str(), data);

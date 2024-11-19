@@ -21,6 +21,6 @@ struct CONFIGURATION {
     ENVIRONMENT environment;
 };
 
-void increase(const CONFIGURATION& configuration, const std::string& label);
+void increase(const CONFIGURATION &configuration, const std::string &label);
 
-void decrease(const CONFIGURATION& configuration, const std::string& label);
+void decrease(const CONFIGURATION &configuration, const std::string &label);

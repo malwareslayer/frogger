@@ -4,7 +4,7 @@
 
 #include "../src/property.hpp"
 
-auto choose(WINDOW* window, const PROPERTY& property, const std::vector<std::string>& labels) -> std::string {
+auto choose(WINDOW *window, const PROPERTY &property, const std::vector<std::string> &labels) -> std::string {
     const int maximum = static_cast<int>(labels.size());
 
     switch (wgetch(window)) {

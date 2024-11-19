@@ -2,25 +2,31 @@
  * Copyright 2024 <Team 1 UPH IF 2024>
  */
 
+#include "../../src/interface/setting.hpp"
+
 #include "../../src/configuration.hpp"
 #include "../../src/property.hpp"
 
-#include "../../src/interface/setting.hpp"
+#include <thread>
 
 const std::vector<std::string> labeling = {"Car", "Log", "Back"};
 
-#include <thread>
-
-void setting(WINDOW* window, const CONFIGURATION& configuration) {
-    constexpr INTERFACE context = {.visual = {.y = 10, .x = 30},
-                                   .interface = {
-                                       .choose = 1,
-
-                                   }};
+void setting(WINDOW *window, const CONFIGURATION &configuration) {
+    constexpr INTERFACE context = {
+        .visual = {
+            .y = 10,
+            .x = 30
+        },
+        .interface = {
+            .choose = 1,
+        }
+    };
 
     boxes(window, context.interface.choose, labeling);
 
     while (configuration.status.running) {
+        wclear(window);
+
         if (const std::string choosing = choose(window, context.interface, labeling); choosing == "Back") {
             break;
         } else if (choosing == "KEY_RIGHT") {
@@ -64,6 +70,5 @@ void setting(WINDOW* window, const CONFIGURATION& configuration) {
         boxes(window, context.interface.choose, labeling);
     }
 
-    wclear(window);
     wrefresh(window);
 }

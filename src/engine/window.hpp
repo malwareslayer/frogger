@@ -12,8 +12,8 @@ struct VISUAL {
     mutable int width;
 };
 
-auto create(const int &y, const int &x, const int &height, const int &width) -> WINDOW *;
+auto create(const int &y, const int &x, const int &height, const int &width) -> WINDOW*;
 
-void boxes(WINDOW *window, const int &highlight, const std::vector<std::string> &choices);
+void boxes(WINDOW* &window, const int &highlight, const std::vector<std::string> &choices);
 
-void bar(WINDOW *window, const int &data, const int &y, const int &x);
+void bar(WINDOW* &window, const int &data, const int &y, const int &x);
