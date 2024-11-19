@@ -9,7 +9,7 @@ auto keypad(WINDOW *window, const INTERFACE &context, const SPRITE &sprite, cons
                 tile.board.y = tile.board.y - sprite.height - 1;
 
                 if (tile.board.y < 1) {
-                    tile.board.y = 2;
+                    tile.board.y = 3;
                 }
             }
             break;
