@@ -4,4 +4,4 @@
 
 #include "../configuration.hpp"
 
-void game(WINDOW *parent, const CONFIGURATION &configuration);
+void game(WINDOW *&parent, const CONFIGURATION &configuration);
