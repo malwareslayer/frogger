@@ -1,9 +1,9 @@
-#include "game.hpp"
-
 #include <mutex>
 #include <random>
 #include <shared_mutex>
 #include <thread>
+
+#include "../../src/interface/game.hpp"
 
 #include "../../src/game/interface.hpp"
 #include "../../src/game/sprite.hpp"
@@ -37,7 +37,7 @@ auto total(NODE* &root) -> int {
     return index;
 }
 
-auto create(NODE* &root, const TILE &tile, const SPRITE &sprite, const bool &active = true) -> NODE * {
+auto create(NODE* &root, const TILE &tile, const SPRITE &sprite, const bool &active = true) -> NODE* {
     {
         std::unique_lock<std::shared_mutex> lock(mutex);
         if (!root->next) {
@@ -54,7 +54,7 @@ auto create(NODE* &root, const TILE &tile, const SPRITE &sprite, const bool &act
     return root->next;
 }
 
-void animate(const NODE *root, const INTERFACE &context) {
+void animate(const NODE* root, const INTERFACE &context) {
     while (root->active) {
         {
             std::unique_lock<std::shared_mutex> lock(mutex);
@@ -71,9 +71,7 @@ void animate(const NODE *root, const INTERFACE &context) {
     }
 }
 
-void play(NODE *&root, WINDOW *&window, const INTERFACE &context, const CONFIGURATION &configuration) {
-    configuration.status.play = true;
-
+void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGURATION &configuration) {
     std::random_device seed;
     std::mt19937 generate(seed());
     std::uniform_int_distribution<int> distribution(1, configuration.environment.car);
@@ -82,7 +80,10 @@ void play(NODE *&root, WINDOW *&window, const INTERFACE &context, const CONFIGUR
 
     const SPRITE car = sprite(RCAR);
 
-    for (size_t j = total(root) + 1; j < total(root) + distribution(generate) + 1; j++) {
+    const int count = total(root);
+    const int random = distribution(generate);
+
+    for (size_t j = count + 1; j < count + random + 1; j++) {
         for (NODE* current = root; current != nullptr; current = current->next) {
             if (current->index == j) {
                 continue;
@@ -93,7 +94,7 @@ void play(NODE *&root, WINDOW *&window, const INTERFACE &context, const CONFIGUR
                     case SEPARATOR:
                         {
                             std::unique_lock<std::shared_mutex> lock(mutex);
-                            current->next = new NODE{
+                            current->next = new NODE {
                                 .index = current->index + 1,
                                 .active = false,
                                 .sprite = car,
@@ -105,7 +106,7 @@ void play(NODE *&root, WINDOW *&window, const INTERFACE &context, const CONFIGUR
                     case CAR:
                         {
                             std::unique_lock<std::shared_mutex> lock(mutex);
-                            current->next = new NODE{
+                            current->next = new NODE {
                                 .index = current->index + 1,
                                 .active = false,
                                 .sprite = car,
@@ -121,7 +122,7 @@ void play(NODE *&root, WINDOW *&window, const INTERFACE &context, const CONFIGUR
         }
     }
 
-    for (NODE *current = root->next; current != nullptr; current = current->next) {
+    for (NODE* current = root->next; current != nullptr; current = current->next) {
         switch (current->tile.type) {
             case CAR:
                 if (current->active == false) {
@@ -149,27 +150,10 @@ void play(NODE *&root, WINDOW *&window, const INTERFACE &context, const CONFIGUR
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 
-    for (const NODE *current = root; current != nullptr; current = current->next) {
-        switch (current->tile.type) {
-            case CAR:
-                if (current->active == true) {
-                    {
-                        std::unique_lock<std::shared_mutex> lock(mutex);
-                        current->active = false;
-                    }
-
-                    current->worker.join();
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
     configuration.status.play = false;
 }
 
-void game(WINDOW *&parent, const CONFIGURATION &configuration) {
+void game(WINDOW* &parent, const CONFIGURATION &configuration) {
     const INTERFACE context = {
         .visual = {
             .y = 0,
@@ -187,6 +171,12 @@ void game(WINDOW *&parent, const CONFIGURATION &configuration) {
 
     nodelay(window, true);
     keypad(window, true);
+    clearok(window, true);
+
+    {
+        std::unique_lock<std::shared_mutex> lock(mutex);
+        configuration.status.play = true;
+    }
 
     const SPRITE frog = sprite(LFROG);
     const TILE player = tile(PLAYER, context.visual.height - frog.height - 1, context.visual.width / 2);
@@ -198,13 +188,17 @@ void game(WINDOW *&parent, const CONFIGURATION &configuration) {
         .tile = player
     };
 
-    std::thread thread(play, std::ref(root), std::ref(window), std::ref(context), std::ref(configuration));
+    std::thread playing(play, std::ref(root), std::ref(window), std::ref(context), std::ref(configuration));
 
     while (configuration.status.running) {
+        wclear(window);
+
+        wbkgd(window, ' ' | A_NORMAL);
+
+        werase(window);
+
         {
             std::shared_lock<std::shared_mutex> lock(mutex);
-
-            wclear(window);
 
             if (configuration.status.play == false) {
                 break;
@@ -240,16 +234,35 @@ void game(WINDOW *&parent, const CONFIGURATION &configuration) {
             mvwprintw(window, context.visual.height - 1, 25, "%s", "BAWAH = KEY DOWN");
             mvwprintw(window, context.visual.height - 1, 50, "%s", "KANAN = KEY RIGHT");
             mvwprintw(window, context.visual.height - 1, 75, "%s", "KIRI = KEY LEFT");
-
-            wrefresh(window);
         }
+
+        wnoutrefresh(window);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
 
-        werase(window);
+        doupdate();
+
+        wrefresh(window);
     }
 
-    thread.join();
+    for (const NODE* current = root; current != nullptr; current = current->next) {
+        switch (current->tile.type) {
+            case CAR:
+                if (current->active == true) {
+                    {
+                        std::unique_lock<std::shared_mutex> lock(mutex);
+                        current->active = false;
+                    }
+
+                    current->worker.join();
+                }
+            break;
+            default:
+                break;
+        }
+    }
+
+    playing.join();
 
     wclear(window);
     wclrtoeol(window);
