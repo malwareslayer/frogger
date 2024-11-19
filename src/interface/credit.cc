@@ -28,7 +28,7 @@ const std::vector<std::string> labeling = {
     "",
     "Immeasurable thanks to Mr. Robertus Hudi, S.Inf., M.Kom for making everything possible"};
 
-void credit(WINDOW *window, const int &height, const int &width) {
+void credit(WINDOW* &window, const int &height, const int &width) {
     wclear(window);
     wrefresh(window);
 

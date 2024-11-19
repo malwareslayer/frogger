@@ -44,14 +44,14 @@ void menu(const CONFIGURATION &configuration) {
         } else if (choosing == "Credit") {
             wclear(window);
 
-            credit(window, context.visual.height, context.visual.width);
+            credit(window, 15, 30);
         } else if (choosing == "Exit") {
             configuration.status.running = false;
         } else {
             wrefresh(window);
         }
 
-        std::this_thread::sleep_for(std::chrono::microseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
         boxes(window, context.interface.choose, labeling);
     }

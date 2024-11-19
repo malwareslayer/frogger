@@ -25,8 +25,6 @@ void setting(WINDOW *window, const CONFIGURATION &configuration) {
     boxes(window, context.interface.choose, labeling);
 
     while (configuration.status.running) {
-        wclear(window);
-
         if (const std::string choosing = choose(window, context.interface, labeling); choosing == "Back") {
             break;
         } else if (choosing == "KEY_RIGHT") {
@@ -65,10 +63,10 @@ void setting(WINDOW *window, const CONFIGURATION &configuration) {
             }
         }
 
-        std::this_thread::sleep_for(std::chrono::microseconds(500));
+        wrefresh(window);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
         boxes(window, context.interface.choose, labeling);
     }
-
-    wrefresh(window);
 }
