@@ -16,11 +16,12 @@ std::shared_mutex mutex;
 struct NODE {
     mutable int index;
     mutable bool active;
+    mutable bool pause = false;
     mutable std::thread worker;
     mutable SPRITE sprite;
     mutable TILE tile;
-    mutable NODE *previous = nullptr;
-    mutable NODE *next = nullptr;
+    mutable NODE* previous = nullptr;
+    mutable NODE* next = nullptr;
 };
 
 auto total(NODE* &root) -> int {
@@ -56,13 +57,32 @@ auto create(NODE* &root, const TILE &tile, const SPRITE &sprite, const bool &act
 
 void animate(const NODE* root, const INTERFACE &context) {
     while (root->active) {
-        {
-            std::unique_lock<std::shared_mutex> lock(mutex);
+        if (root->tile.type == RIGHT_CAR) {
             if (root->tile.board.x < context.visual.width + root->sprite.width) {
-                root->tile.board.x = root->tile.board.x + root->sprite.width + 1;
+                {
+                    std::unique_lock<std::shared_mutex> lock(mutex);
+                    root->tile.board.x = root->tile.board.x + root->sprite.width + 1;
+                }
 
                 if (root->tile.board.x + root->sprite.width > context.visual.width) {
-                    root->tile.board.x = 0;
+                    {
+                        std::unique_lock<std::shared_mutex> lock(mutex);
+                        root->tile.board.x = 0;
+                    }
+                }
+            }
+        } else {
+            if (root->tile.board.x < context.visual.width + root->sprite.width) {
+                {
+                    std::unique_lock<std::shared_mutex> lock(mutex);
+                    root->tile.board.x = root->tile.board.x + root->sprite.width + 1;
+                }
+
+                if (root->tile.board.x + root->sprite.width > context.visual.width) {
+                    {
+                        std::unique_lock<std::shared_mutex> lock(mutex);
+                        root->tile.board.x = 0;
+                    }
                 }
             }
         }
@@ -78,45 +98,55 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
 
     create(root, tile(SEPARATOR, context.visual.height - 1 - root->sprite.height - 1, 0), {});
 
-    const SPRITE car = sprite(RCAR);
+    const SPRITE rcar = sprite(RCAR);
+    const SPRITE lcar = sprite(LCAR);
 
-    const int count = total(root);
-    const int random = distribution(generate);
+    int initial = total(root);
 
-    for (size_t j = count + 1; j < count + random + 1; j++) {
+    for (size_t i = 1; i <= 3; i++) {
         for (NODE* current = root; current != nullptr; current = current->next) {
-            if (current->index == j) {
+            const int now = total(root);
+
+            if (current->index < now) {
                 continue;
             }
 
+            const int random = distribution(generate);
+
+            if (initial != now) {
+                initial = now;
+                break;
+            }
+
             if (!current->next) {
-                switch (current->tile.type) {
-                    case SEPARATOR:
-                        {
-                            std::unique_lock<std::shared_mutex> lock(mutex);
-                            current->next = new NODE {
-                                .index = current->index + 1,
+                NODE* previous = current;
+
+                if (i % 2 != 0) {
+                    {
+                        std::unique_lock<std::shared_mutex> lock(mutex);
+                        for (int j = now + 1; j <= now + random; j++) {
+                            const auto next = new NODE {
+                                .index = j,
                                 .active = false,
-                                .sprite = car,
-                                .tile = tile(CAR, current->tile.board.y - car.height, 0),
-                                .previous = current,
+                                .sprite = rcar,
+                                .previous = previous,
                             };
+
+                            switch (previous->tile.type) {
+                                case SEPARATOR:
+                                    next->tile = tile(RIGHT_CAR, current->tile.board.y - rcar.height - 1, current->tile.board.x + rcar.width + 1);
+                                    break;
+                                case RIGHT_CAR:
+                                    next->tile = tile(RIGHT_CAR, current->tile.board.y, current->tile.board.x + rcar.width + 1);
+                                    break;
+                                default:
+                                    exit(1);
+                            }
+
+                            previous->next = next;
+                            previous = next;
                         }
-                        break;
-                    case CAR:
-                        {
-                            std::unique_lock<std::shared_mutex> lock(mutex);
-                            current->next = new NODE {
-                                .index = current->index + 1,
-                                .active = false,
-                                .sprite = car,
-                                .tile = tile(CAR, current->tile.board.y, current->tile.board.x + car.width + 1),
-                                .previous = current,
-                            };
-                        }
-                        break;
-                    default:
-                        break;
+                    }
                 }
             }
         }
@@ -124,7 +154,7 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
 
     for (NODE* current = root->next; current != nullptr; current = current->next) {
         switch (current->tile.type) {
-            case CAR:
+            case RIGHT_CAR:
                 if (current->active == false) {
                     {
                         std::unique_lock<std::shared_mutex> lock(mutex);
@@ -218,7 +248,13 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                                 mvwprintw(window, current->tile.board.y, index, "%c", '=');
                             }
                             break;
-                        case CAR:
+                        case RIGHT_CAR:
+                            for (size_t index = 0; index < current->sprite.symbol.size(); index++) {
+                                mvwprintw(window, current->tile.board.y + index, current->tile.board.x, "%s",
+                                          current->sprite.symbol[index].c_str());
+                            }
+                            break;
+                        case LEFT_CAR:
                             for (size_t index = 0; index < current->sprite.symbol.size(); index++) {
                                 mvwprintw(window, current->tile.board.y + index, current->tile.board.x, "%s",
                                           current->sprite.symbol[index].c_str());
@@ -247,7 +283,7 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
 
     for (const NODE* current = root; current != nullptr; current = current->next) {
         switch (current->tile.type) {
-            case CAR:
+            case RIGHT_CAR:
                 if (current->active == true) {
                     {
                         std::unique_lock<std::shared_mutex> lock(mutex);
@@ -256,7 +292,17 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
 
                     current->worker.join();
                 }
-            break;
+                break;
+            case LEFT_CAR:
+                if (current->active == true) {
+                    {
+                        std::unique_lock<std::shared_mutex> lock(mutex);
+                        current->active = false;
+                    }
+
+                    current->worker.join();
+                }
+                break;
             default:
                 break;
         }
