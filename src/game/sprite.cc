@@ -8,30 +8,15 @@ struct GEOMETRY {
     mutable int width;
 };
 
-auto calculate(const std::array<char, 512> &symbol) -> GEOMETRY {
-    int height = 1, width = 1;
-
-    for (const auto &character : symbol) {
-        if (character == '\0') {
-            break;
-        }
-
-        switch (character) {
-            case '\n':
-                height = height + 1;
-                break;
-            default:
-                width = width + 1;
-                break;
-        }
-    }
-
-    return GEOMETRY{.height = height, .width = width / height};
+auto calculate(const std::vector<std::string> &symbol) -> GEOMETRY {
+    return GEOMETRY {
+        .height = static_cast<int>(symbol.size()),
+        .width = static_cast<int>(symbol[0].size()) + 1
+    };
 }
 
-auto symbolize(const std::array<char, 512> &source) -> std::vector<std::string> {
-    const std::string data(source.data());
-    std::istringstream stream(data);
+auto symbolize(const std::string &source) -> std::vector<std::string> {
+    std::istringstream stream(source);
     std::string line;
 
     std::vector<std::string> result;
@@ -44,15 +29,12 @@ auto symbolize(const std::array<char, 512> &source) -> std::vector<std::string> 
 }
 
 auto sprite(const std::string &data) -> SPRITE {
-    std::array<char, 512> symbol{};
-
-    std::copy_n(data.begin(), std::min(data.size(), data.length() - 1), symbol.begin());
+    const std::vector<std::string> symbol = symbolize(data);
 
     auto [height, width] = calculate(symbol);
 
-    return SPRITE{
-        .source = symbol,
-        .symbol = symbolize(symbol),
+    return SPRITE {
+        .symbol = symbol,
         .height = height,
         .width = width,
     };

@@ -5,10 +5,11 @@
 #include <vector>
 
 struct SPRITE {
-    mutable std::array<char, 512> source;
     mutable std::vector<std::string> symbol;
     mutable int height;
     mutable int width;
+    mutable int track = 1;
+    mutable SPRITE* next = nullptr;
 };
 
 auto symbolize(const std::array<char, 512> &source) -> std::vector<std::string>;

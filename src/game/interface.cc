@@ -23,20 +23,20 @@ auto keypad(WINDOW *window, const INTERFACE &context, const SPRITE &sprite, cons
             }
             break;
         case KEY_LEFT:
-            if (tile.board.x > 1) {
+            if (tile.board.x >= 0) {
                 tile.board.x = tile.board.x - sprite.width - 1;
 
-                if (tile.board.x < 1) {
+                if (tile.board.x <= 0) {
                     tile.board.x = 0;
                 }
             }
             break;
         case KEY_RIGHT:
-            if (tile.board.x + sprite.width < context.visual.width) {
+            if (tile.board.x <= context.visual.width) {
                 tile.board.x = tile.board.x + sprite.width + 1;
 
                 if (tile.board.x + sprite.width > context.visual.width) {
-                    tile.board.x = context.visual.width - 1 - sprite.width;
+                    tile.board.x = context.visual.width - sprite.width + 1;
                 }
             }
             break;
