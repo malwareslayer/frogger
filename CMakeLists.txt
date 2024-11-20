@@ -13,5 +13,9 @@ include_directories(${CURSES_INCLUDE_DIR})
 file(GLOB_RECURSE HEADERS "${CMAKE_SOURCE_DIR}/src/*.hpp")
 file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/src/*.cc")
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(DEBUG)
+endif()
+
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT_NAME} ${CURSES_LIBRARIES})

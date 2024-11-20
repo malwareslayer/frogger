@@ -1,6 +1,6 @@
 #pragma once
 
-enum TYPE { PLAYER, SEPARATOR, RIGHT_CAR, LEFT_CAR };
+enum TYPE { PLAYER, SEPARATOR, RIGHT_CAR, LEFT_CAR, WATER, LILLY, LOG };
 
 struct BOARD {
     mutable int y;
