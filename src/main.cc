@@ -15,7 +15,7 @@ auto main(int argc, char *argv[]) -> int {
         },
         .environment = {
             .car = 1,
-            .log = 1
+            .log = 2
         }
     });
 

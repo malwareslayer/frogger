@@ -9,7 +9,7 @@ const std::string RCAR =
     "=`-(_)--(_)-'\n";
 
 const std::string LCAR =
-    "      ______ \n"
+    "     ______  \n"
     " __.'/_||_|\\\n"
     "/_ _    _   )\n"
     "'-(_)--(_)-=`\n";
