@@ -109,10 +109,10 @@ void animate(const NODE* root, const INTERFACE &context, const int &cycle) {
                         root->tile.board.x = root->tile.board.x - root->sprite.width;
                     }
 
-                    if (root->tile.board.x < 0) {
+                    if (root->tile.board.x <= -root->sprite.width) {
                         {
                             std::unique_lock<std::shared_mutex> lock(mutex);
-                            root->tile.board.x = context.visual.width - root->sprite.width;
+                            root->tile.board.x = context.visual.width - root->sprite.width + 2;
                         }
                     }
                 }
@@ -121,7 +121,7 @@ void animate(const NODE* root, const INTERFACE &context, const int &cycle) {
                 if (root->tile.board.x <= context.visual.width) {
                     {
                         std::unique_lock<std::shared_mutex> lock(mutex);
-                        root->tile.board.x = root->tile.board.x + root->sprite.width + 1;
+                        root->tile.board.x = root->tile.board.x + (root->sprite.width / 2);
                     }
 
                     if (root->tile.board.x >= context.visual.width) {
@@ -136,13 +136,13 @@ void animate(const NODE* root, const INTERFACE &context, const int &cycle) {
                 if (root->tile.board.x >= 0) {
                     {
                         std::unique_lock<std::shared_mutex> lock(mutex);
-                        root->tile.board.x = root->tile.board.x - root->sprite.width - 1;
+                        root->tile.board.x = root->tile.board.x - (root->sprite.width / 2);
                     }
 
-                    if (root->tile.board.x < 0) {
+                    if (root->tile.board.x - root->sprite.width < -root->sprite.width) {
                         {
                             std::unique_lock<std::shared_mutex> lock(mutex);
-                            root->tile.board.x = context.visual.width - root->sprite.width + 1;
+                            root->tile.board.x = (context.visual.width + 2) - (root->sprite.width / 2);
                         }
                     }
                 }
@@ -195,13 +195,13 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
                         for (int j = now + 1; j <= now + random_car; j++) {
                             switch (last->tile.type) {
                                 case SEPARATOR:
-                                    last = create(last, last, tile(RIGHT_CAR, last->tile.board.y - rcar.height, last->tile.board.x - rcar.width), rcar, false);
+                                    last = create(last, last, tile(RIGHT_CAR, last->tile.board.y - rcar.height, 0), rcar, false);
                                     break;
                                 case RIGHT_CAR:
-                                    last = create(last, last, tile(RIGHT_CAR, last->tile.board.y, last->tile.board.x + rcar.width), rcar, false);
+                                    last = create(last, last, tile(RIGHT_CAR, last->tile.board.y, 0), rcar, false);
                                     break;
                                 case LEFT_CAR:
-                                    last = create(last, last, tile(RIGHT_CAR, last->tile.board.y - rcar.height - 1, last->tile.board.x - rcar.width), rcar, false);
+                                    last = create(last, last, tile(RIGHT_CAR, last->tile.board.y - rcar.height - 1, 0), rcar, false);
                                     break;
                                 default:
                                     exit(1);
@@ -219,10 +219,10 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
                                     last = create(last, last, tile(LEFT_CAR, last->tile.board.y - lcar.height, context.visual.width - lcar.width), lcar, false);
                                     break;
                                 case RIGHT_CAR:
-                                    last = create(last, last, tile(LEFT_CAR, last->tile.board.y - lcar.height - 1, context.visual.width), lcar, false);
+                                    last = create(last, last, tile(LEFT_CAR, last->tile.board.y - lcar.height - 1, context.visual.width + 2), lcar, false);
                                     break;
                                 case LEFT_CAR:
-                                    last = create(last, last, tile(LEFT_CAR, last->tile.board.y, last->tile.board.x - lcar.width), lcar, false);
+                                    last = create(last, last, tile(LEFT_CAR, last->tile.board.y, context.visual.width + 2), lcar, false);
                                     break;
                                 default:
                                     exit(1);
@@ -254,12 +254,14 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
 
     for (size_t i = 1; i <= 4; i++) {
         if (i == 1) {
-            ax = last->tile.board.x + (x.width + 1) * 3;
-        } else {
-            ax = last->tile.board.x + (x.width + 1) * 4;
+            ax = last->tile.board.x + x.width * 2;
+        } else if (i == 3) {
+            ax = last->tile.board.x + x.width * 5;
+        }else {
+            ax = last->tile.board.x + x.width * 3;
         }
 
-        for (size_t j = 1; j <= 2; j++) {
+        for (size_t j = 1; j <= 3; j++) {
             {
                 std::unique_lock<std::shared_mutex> lock(mutex);
                 auto lily = new NODE {
@@ -284,7 +286,7 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
                 if (j == 1) {
                     lily->tile = tile(LILY, separator->tile.board.y - root->sprite.height - 1, ax);
                 } else {
-                    lily->tile = tile(LILY, separator->tile.board.y - root->sprite.height - 1, last->tile.board.x + x.width + 1);
+                    lily->tile = tile(LILY, separator->tile.board.y - root->sprite.height - 1, last->tile.board.x + x.width);
                 }
 
                 last = create(last, last, lily);
@@ -300,15 +302,15 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
         ay = (ay - log.height);
 
         int cx = 0;
-        int dx = context.visual.width + 2;
+        int dx = context.visual.width + 2 + log.width;
 
         for (size_t j = 1; j <= distribution_log(generate); j++) {
             if (i % 2 != 0) {
                 last = create(last, last, tile(RIGHT_LOG, ay, cx), log, false);
 
-                cx = cx + log.width + 1;
+                cx = cx + log.width;
             } else {
-                dx = dx - log.width - 1;
+                dx = dx - log.width;
 
                 last = create(last, last, tile(LEFT_LOG, ay, dx), log, false);
             }
@@ -323,10 +325,10 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
             {
                 std::unique_lock<std::shared_mutex> lock(mutex);
 
-                int cycle = 125;
+                int cycle = 250;
 
                 if (current->tile.type == LEFT_LOG || current->tile.type == RIGHT_LOG) {
-                    cycle = 500;
+                    cycle = 1250;
                 }
 
                 current->active = true;

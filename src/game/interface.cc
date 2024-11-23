@@ -5,11 +5,11 @@ auto keypad(WINDOW *window, const INTERFACE &context, const SPRITE &sprite, cons
         case 'q':
             return "q";
         case KEY_UP:
-            if (tile.board.y > 1) {
+            if (tile.board.y >= 0) {
                 tile.board.y = tile.board.y - sprite.height - 1;
 
-                if (tile.board.y < 1) {
-                    tile.board.y = 3;
+                if (tile.board.y <= 0) {
+                    tile.board.y = 0;
                 }
             }
             break;
@@ -18,13 +18,13 @@ auto keypad(WINDOW *window, const INTERFACE &context, const SPRITE &sprite, cons
                 tile.board.y = tile.board.y + sprite.height + 1;
 
                 if (tile.board.y + sprite.height > context.visual.height) {
-                    tile.board.y = context.visual.height - 1 - sprite.height;
+                    tile.board.y = context.visual.height - sprite.height - 1;
                 }
             }
             break;
         case KEY_LEFT:
             if (tile.board.x >= 0) {
-                tile.board.x = tile.board.x - sprite.width - 1;
+                tile.board.x = tile.board.x - sprite.width;
 
                 if (tile.board.x <= 0) {
                     tile.board.x = 0;
@@ -33,10 +33,10 @@ auto keypad(WINDOW *window, const INTERFACE &context, const SPRITE &sprite, cons
             break;
         case KEY_RIGHT:
             if (tile.board.x <= context.visual.width) {
-                tile.board.x = tile.board.x + sprite.width + 1;
+                tile.board.x = tile.board.x + sprite.width;
 
-                if (tile.board.x + sprite.width > context.visual.width) {
-                    tile.board.x = context.visual.width - sprite.width + 1;
+                if (tile.board.x + sprite.width >= context.visual.width) {
+                    tile.board.x = context.visual.width - sprite.width + 2;
                 }
             }
             break;
