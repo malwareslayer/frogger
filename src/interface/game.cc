@@ -84,7 +84,7 @@ auto create(NODE* &root, NODE* &previous, NODE* &newest) -> NODE* {
     return previous->next;
 }
 
-void animate(const NODE* root, const INTERFACE &context, const int &cycle) {
+void animate(WINDOW* &window, const NODE* root, const NODE* player, const INTERFACE &context, const int &cycle) {
     while (root->active) {
         switch (root->tile.type) {
             case RIGHT_CAR:
@@ -119,9 +119,29 @@ void animate(const NODE* root, const INTERFACE &context, const int &cycle) {
                 break;
             case RIGHT_LOG:
                 if (root->tile.board.x <= context.visual.width) {
+                    const int previous = root->tile.board.x;
+
                     {
                         std::unique_lock<std::shared_mutex> lock(mutex);
-                        root->tile.board.x = root->tile.board.x + (root->sprite.width / 2);
+                        root->tile.board.x = root->tile.board.x + root->sprite.width / 2;
+                    }
+
+                    {
+                        std::shared_lock<std::shared_mutex> lock(mutex);
+                        if (root->tile.board.y == player->tile.board.y) {
+                            if (previous + player->sprite.width == player->tile.board.x) {
+                                player->tile.board.x = player->tile.board.x + player->sprite.width;
+                            }
+                        }
+                    }
+
+                    {
+                        std::shared_lock<std::shared_mutex> lock(mutex);
+                        if (root->tile.board.y == player->tile.board.y) {
+                            if (previous == player->tile.board.x) {
+                                player->tile.board.x = root->tile.board.x;
+                            }
+                        }
                     }
 
                     if (root->tile.board.x >= context.visual.width) {
@@ -134,15 +154,35 @@ void animate(const NODE* root, const INTERFACE &context, const int &cycle) {
                 break;
             case LEFT_LOG:
                 if (root->tile.board.x >= 0) {
+                    const int previous = root->tile.board.x;
+
                     {
                         std::unique_lock<std::shared_mutex> lock(mutex);
-                        root->tile.board.x = root->tile.board.x - (root->sprite.width / 2);
+                        root->tile.board.x = root->tile.board.x - root->sprite.width / 2;
+                    }
+
+                    {
+                        std::shared_lock<std::shared_mutex> lock(mutex);
+                        if (root->tile.board.y == player->tile.board.y) {
+                            if (previous - player->sprite.width == player->tile.board.x) {
+                                player->tile.board.x = player->tile.board.x - player->sprite.width;
+                            }
+                        }
+                    }
+
+                    {
+                        std::shared_lock<std::shared_mutex> lock(mutex);
+                        if (root->tile.board.y == player->tile.board.y) {
+                            if (previous == player->tile.board.x) {
+                                player->tile.board.x = root->tile.board.x;
+                            }
+                        }
                     }
 
                     if (root->tile.board.x - root->sprite.width < -root->sprite.width) {
                         {
                             std::unique_lock<std::shared_mutex> lock(mutex);
-                            root->tile.board.x = (context.visual.width + 2) - (root->sprite.width / 2);
+                            root->tile.board.x = context.visual.width + 2 - root->sprite.width / 2;
                         }
                     }
                 }
@@ -151,11 +191,7 @@ void animate(const NODE* root, const INTERFACE &context, const int &cycle) {
                 break;
         }
 
-#if DEBUG
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-#else
         std::this_thread::sleep_for(std::chrono::milliseconds(cycle));
-#endif
     }
 }
 
@@ -332,7 +368,7 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
                 }
 
                 current->active = true;
-                current->worker = std::thread(animate, current, std::ref(context), cycle);
+                current->worker = std::thread(animate, std::ref(window), current, root, std::ref(context), cycle);
             }
         }
     }
@@ -343,9 +379,33 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
             break;
         }
 
-        /*
-        for (const NODE* current = root->next; current != nullptr; current = current->next) {}
-        */
+        for (const NODE* current = root->next; current != nullptr; current = current->next) {
+            switch (current->tile.type) {
+                case RIGHT_LOG:
+                    {
+                        std::shared_lock<std::shared_mutex> lock(mutex);
+                        if (current->tile.board.y == root->tile.board.y) {
+                            if (current->tile.board.x == root->tile.board.x) {
+#if DEBUG
+                                mvwprintw(window, 0, 0, "%s", std::string("TRIGGERED #1").c_str());
+#endif
+                                root->tile.board.x = current->tile.board.x;
+                            }
+
+                            if (current->tile.board.x + root->sprite.width == root->tile.board.x) {
+#if DEBUG
+                                mvwprintw(window, 0, 15, "%s", std::string("TRIGGERED #2").c_str());
+#endif
+                                root->tile.board.x = current->tile.board.x + root->sprite.width;
+                            }
+                        }
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+        }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
@@ -419,8 +479,8 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                                           current->sprite.symbol[index].c_str());
                             }
 #if DEBUG
-                            mvwprintw(window, current->tile.board.y + 2, current->tile.board.x + 6, "%s", std::to_string(current->tile.board.x).c_str());
-                            mvwprintw(window, current->tile.board.y + 2, current->tile.board.x + 10, "%s", std::to_string(current->tile.board.y).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 3, "%s", std::to_string(current->tile.board.y).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 7, "%s", std::to_string(current->tile.board.x).c_str());
 #endif
                             break;
                         case LEFT_CAR:
@@ -429,8 +489,8 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                                           current->sprite.symbol[index].c_str());
                             }
 #if DEBUG
-                            mvwprintw(window, current->tile.board.y + 2, current->tile.board.x + 6, "%s", std::to_string(current->tile.board.x).c_str());
-                            mvwprintw(window, current->tile.board.y + 2, current->tile.board.x + 10, "%s", std::to_string(current->tile.board.y).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 3, "%s", std::to_string(current->tile.board.y).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 7, "%s", std::to_string(current->tile.board.x).c_str());
 #endif
                             break;
 #if RELEASE
@@ -451,12 +511,21 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                                 mvwprintw(window, current->tile.board.y + index, current->tile.board.x, "%s",
                                           current->sprite.symbol[index].c_str());
                             }
+#if DEBUG
+                            mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 3, "%s", std::to_string(current->tile.board.y).c_str());
+                            mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 7, "%s", std::to_string(current->tile.board.x).c_str());
+#endif
                             break;
                         case LEFT_LOG:
                             for (size_t index = 0; index < current->sprite.symbol.size(); index++) {
                                 mvwprintw(window, current->tile.board.y + index, current->tile.board.x, "%s",
                                           current->sprite.symbol[index].c_str());
                             }
+#if DEBUG
+                        mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 3, "%s", std::to_string(current->tile.board.y).c_str());
+                        mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 7, "%s", std::to_string(current->tile.board.x).c_str());
+#endif
+
                             break;
                         default:
                             break;
@@ -485,21 +554,17 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
             mvwprintw(window, context.visual.height - 1, 125, "%s", "LEFT CAR = ");
             mvwprintw(window, context.visual.height - 1, 145, "%s", std::to_string(left).c_str());
 
-            mvwprintw(window, context.visual.height - 1, 155, "%s", "X = ");
-            mvwprintw(window, context.visual.height - 1, 160, "%s", std::to_string(root->tile.board.x).c_str());
+            mvwprintw(window, context.visual.height - 1, 155, "%s", "Y = ");
+            mvwprintw(window, context.visual.height - 1, 160, "%s", std::to_string(root->tile.board.y).c_str());
 
-            mvwprintw(window, context.visual.height - 1, 165, "%s", "Y = ");
-            mvwprintw(window, context.visual.height - 1, 170, "%s", std::to_string(root->tile.board.y).c_str());
+            mvwprintw(window, context.visual.height - 1, 165, "%s", "X = ");
+            mvwprintw(window, context.visual.height - 1, 170, "%s", std::to_string(root->tile.board.x).c_str());
 #endif
         }
 
         wnoutrefresh(window);
 
-#if DEBUG
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-#else
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
-#endif
 
         doupdate();
 
