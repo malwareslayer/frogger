@@ -10,7 +10,7 @@
 
 #include <thread>
 
-const std::vector<std::string> labeling = {"Play", "Setting", "Credit", "Exit"};
+const std::vector<std::string> labeling = {"Bermain", "Pengaturan", "Kredit", "Keluar"};
 
 void menu(const CONFIGURATION &configuration) {
     const INTERFACE context = {
@@ -33,19 +33,19 @@ void menu(const CONFIGURATION &configuration) {
     boxes(window, context.interface.choose, labeling);
 
     while (configuration.status.running) {
-        if (const std::string choosing = choose(window, context.interface, labeling); choosing == "Play") {
+        if (const std::string choosing = choose(window, context.interface, labeling); choosing == "Bermain") {
             wclear(window);
 
             game(window, configuration);
-        } else if (choosing == "Setting") {
+        } else if (choosing == "Pengaturan") {
             wclear(window);
 
             setting(window, configuration);
-        } else if (choosing == "Credit") {
+        } else if (choosing == "Kredit") {
             wclear(window);
 
             credit(window, 15, 30);
-        } else if (choosing == "Exit") {
+        } else if (choosing == "Keluar") {
             configuration.status.running = false;
         } else {
             wrefresh(window);
