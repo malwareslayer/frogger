@@ -44,7 +44,7 @@ void menu(const CONFIGURATION &configuration) {
         } else if (choosing == "Kredit") {
             wclear(window);
 
-            credit(window, 15, 30);
+            credit(window);
         } else if (choosing == "Keluar") {
             configuration.status.running = false;
         } else {

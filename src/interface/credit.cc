@@ -4,6 +4,9 @@
 
 #include "../../src/interface/credit.hpp"
 
+#include "../../src/game/interface.hpp"
+#include "../../src/engine/window.hpp"
+
 #include <string>
 #include <thread>
 #include <vector>
@@ -28,18 +31,31 @@ const std::vector<std::string> labeling = {
     "",
     "Immeasurable thanks to Mr. Robertus Hudi, S.Inf., M.Kom for making everything possible"};
 
-void credit(WINDOW* &window, const int &height, const int &width) {
-    wclear(window);
-    wrefresh(window);
+void credit(WINDOW* &parent) {
+    const INTERFACE context = {
+        .visual = {
+            .y = 0,
+            .x = 0,
+            .height = getmaxy(stdscr),
+            .width = getmaxx(stdscr),
+        },
+    };
 
-    int start = height;
+    wclear(parent);
+    wrefresh(parent);
+    werase(parent);
+
+    WINDOW *window = create(context.visual.y, context.visual.x, context.visual.height, context.visual.width);
+
+
+    int start = context.visual.height;
 
     while (start + labeling.size() > 0) {
         wclear(window);
 
         for (size_t i = 0; i < labeling.size(); ++i) {
-            if (const int y = start + static_cast<int>(i); y >= 0 && y < height) {
-                mvwprintw(window, y, (width - static_cast<int>(labeling[i].length())) / 2, "%s", labeling[i].c_str());
+            if (const int y = start + static_cast<int>(i); y >= 0 && y < context.visual.height) {
+                mvwprintw(window, y, (context.visual.width - static_cast<int>(labeling[i].length())) / 2, "%s", labeling[i].c_str());
             }
         }
 
@@ -51,4 +67,5 @@ void credit(WINDOW* &window, const int &height, const int &width) {
     }
 
     werase(window);
+    
 }
