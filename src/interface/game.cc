@@ -126,19 +126,19 @@ void animate(WINDOW* &window, const NODE* root, const NODE* player, const INTERF
                         root->tile.board.x = root->tile.board.x + root->sprite.width / 2;
                     }
 
-                    {
-                        std::shared_lock<std::shared_mutex> lock(mutex);
-                        if (root->tile.board.y == player->tile.board.y) {
-                            if (previous + player->sprite.width == player->tile.board.x) {
+                    if (root->tile.board.y == player->tile.board.y) {
+                        if (previous + player->sprite.width == player->tile.board.x) {
+                            {
+                                std::shared_lock<std::shared_mutex> lock(mutex);
                                 player->tile.board.x = player->tile.board.x + player->sprite.width;
                             }
                         }
                     }
 
-                    {
-                        std::shared_lock<std::shared_mutex> lock(mutex);
-                        if (root->tile.board.y == player->tile.board.y) {
-                            if (previous == player->tile.board.x) {
+                    if (root->tile.board.y == player->tile.board.y) {
+                        if (previous == player->tile.board.x) {
+                            {
+                                std::shared_lock<std::shared_mutex> lock(mutex);
                                 player->tile.board.x = root->tile.board.x;
                             }
                         }
@@ -164,8 +164,8 @@ void animate(WINDOW* &window, const NODE* root, const NODE* player, const INTERF
                     {
                         std::shared_lock<std::shared_mutex> lock(mutex);
                         if (root->tile.board.y == player->tile.board.y) {
-                            if (previous - player->sprite.width == player->tile.board.x) {
-                                player->tile.board.x = player->tile.board.x - player->sprite.width;
+                            if (previous == player->tile.board.x) {
+                                player->tile.board.x = root->tile.board.x;
                             }
                         }
                     }
@@ -173,8 +173,8 @@ void animate(WINDOW* &window, const NODE* root, const NODE* player, const INTERF
                     {
                         std::shared_lock<std::shared_mutex> lock(mutex);
                         if (root->tile.board.y == player->tile.board.y) {
-                            if (previous == player->tile.board.x) {
-                                player->tile.board.x = root->tile.board.x;
+                            if (previous + player->sprite.width == player->tile.board.x) {
+                                player->tile.board.x = player->tile.board.x - player->sprite.width;
                             }
                         }
                     }
@@ -271,7 +271,6 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
     }
 
     last = create(root, last, tile(SEPARATOR, last->tile.board.y - 1, 0), {});
-    last = create(root, last, tile(SEPARATOR, last->tile.board.y - root->sprite.height - 1, 0), {});
 
     // Save Separator For Fixed Lily Later
     auto separator = last;
@@ -280,6 +279,8 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
     for (size_t i = 1; i <= 5 * root->sprite.height; i++) {
         last = create(root, last, tile(WATER, last->tile.board.y - 1, 0), {});
     }
+
+    last = create(root, last, tile(SEPARATOR, last->tile.board.y, 0), {});
 
     // Generate Lily
     const SPRITE x = sprite(LILY_1);
@@ -401,6 +402,26 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
                         }
                     }
 
+                    break;
+                case LEFT_LOG:
+                    {
+                        std::shared_lock<std::shared_mutex> lock(mutex);
+                        if (current->tile.board.y == root->tile.board.y) {
+                            if (current->tile.board.x == root->tile.board.x) {
+#if DEBUG
+                                mvwprintw(window, 0, 0, "%s", std::string("TRIGGERED #1").c_str());
+#endif
+                                root->tile.board.x = current->tile.board.x;
+                            }
+
+                            if (current->tile.board.x + root->sprite.width == root->tile.board.x) {
+#if DEBUG
+                                mvwprintw(window, 0, 15, "%s", std::string("TRIGGERED #2").c_str());
+#endif
+                                root->tile.board.x = current->tile.board.x + root->sprite.width;
+                            }
+                        }
+                    }
                     break;
                 default:
                     break;

@@ -9,6 +9,7 @@
 struct ENVIRONMENT {
     mutable int car;
     mutable int log;
+    mutable int lives = 3;
 };
 
 struct STATUS {
