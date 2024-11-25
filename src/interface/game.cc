@@ -282,7 +282,7 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
                                     last = create(last, last, tile(RIGHT_CAR, last->tile.board.y - rcar.height, 0), rcar, false);
                                     break;
                                 case RIGHT_CAR:
-                                    last = create(last, last, tile(RIGHT_CAR, last->tile.board.y, 0), rcar, false);
+                                    last = create(last, last, tile(RIGHT_CAR, last->tile.board.y, last->tile.board.x + rcar.width), rcar, false);
                                     break;
                                 case LEFT_CAR:
                                     last = create(last, last, tile(RIGHT_CAR, last->tile.board.y - rcar.height - 1, 0), rcar, false);
@@ -306,7 +306,7 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
                                     last = create(last, last, tile(LEFT_CAR, last->tile.board.y - lcar.height - 1, context.visual.width + 2), lcar, false);
                                     break;
                                 case LEFT_CAR:
-                                    last = create(last, last, tile(LEFT_CAR, last->tile.board.y, context.visual.width + 2), lcar, false);
+                                    last = create(last, last, tile(LEFT_CAR, last->tile.board.y, context.visual.width + 2 - lcar.width), lcar, false);
                                     break;
                                 default:
                                     exit(1);
