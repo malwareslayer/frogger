@@ -2,7 +2,7 @@
 
 #include <shared_mutex>
 
-#include "../../src/configuration.hpp"
+#include "../../src/utility/configuration.hpp"
 
 #include "../../src/game/node.hpp"
 #include "../../src/game/interface.hpp"

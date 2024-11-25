@@ -2,11 +2,12 @@
  * Copyright 2024 <Team 1 UPH IF 2024>
  */
 
+#include "../../src/utility/property.hpp"
+
 #include "../../src/interface/menu.hpp"
 #include "../../src/interface/credit.hpp"
 #include "../../src/interface/game.hpp"
 #include "../../src/interface/setting.hpp"
-#include "../../src/property.hpp"
 
 #include <thread>
 

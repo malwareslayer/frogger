@@ -4,8 +4,8 @@
 
 #include "../../src/interface/setting.hpp"
 
-#include "../../src/configuration.hpp"
-#include "../../src/property.hpp"
+#include "../../src/utility/configuration.hpp"
+#include "../../src/utility/property.hpp"
 
 #include <thread>
 

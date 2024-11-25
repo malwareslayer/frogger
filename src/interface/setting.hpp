@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "../../src/configuration.hpp"
+#include "../../src/utility/configuration.hpp"
 #include "../../src/engine/window.hpp"
 
 void setting(WINDOW *window, const CONFIGURATION &configuration);

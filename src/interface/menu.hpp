@@ -4,6 +4,6 @@
 
 #pragma once
 
-#include "../../src/configuration.hpp"
+#include "../../src/utility/configuration.hpp"
 
 void menu(const CONFIGURATION &configuration);
