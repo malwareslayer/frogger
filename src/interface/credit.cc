@@ -47,7 +47,6 @@ void credit(WINDOW* &parent) {
 
     WINDOW *window = create(context.visual.y, context.visual.x, context.visual.height, context.visual.width);
 
-
     int start = context.visual.height;
 
     while (start + labeling.size() > 0) {
@@ -67,5 +66,4 @@ void credit(WINDOW* &parent) {
     }
 
     werase(window);
-    
 }
