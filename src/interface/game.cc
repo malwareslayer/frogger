@@ -645,7 +645,7 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
         wclear(window);
         box(window, 0, 0);
         wrefresh(window);
-        mvwprintw(window, getmaxy(stdscr) / 2, getmaxx(stdscr) / 2, "%s", "GANE OVER");
+        mvwprintw(window, (getmaxy(stdscr) - 4) / 2, getmaxx(stdscr) / 2, "%s", "GAME OVER");
         wrefresh(window);
     }
 
