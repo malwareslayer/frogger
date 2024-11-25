@@ -84,7 +84,7 @@ auto create(NODE* &root, NODE* &previous, NODE* &newest) -> NODE* {
     return previous->next;
 }
 
-void animate(WINDOW* &window, const NODE* root, const NODE* player, const INTERFACE &context, const int &cycle) {
+void animate(WINDOW* &window, const NODE* root, const NODE* player, const INTERFACE &context, const CONFIGURATION &configuration, const int &cycle) {
     while (root->active) {
         switch (root->tile.type) {
             case RIGHT_CAR:
@@ -92,6 +92,30 @@ void animate(WINDOW* &window, const NODE* root, const NODE* player, const INTERF
                     {
                         std::unique_lock<std::shared_mutex> lock(mutex);
                         root->tile.board.x = root->tile.board.x + root->sprite.width;
+                    }
+
+                    if (root->tile.board.y == player->tile.board.y &&
+                        root->tile.board.x <= player->tile.board.x &&
+                        root->tile.board.x + root->sprite.width >= player->tile.board.x) {
+
+                        if (configuration.environment.lives > 0) {
+                            {
+                                std::unique_lock<std::shared_mutex> lock(mutex);
+                                configuration.environment.lives--;
+                            }
+
+                            {
+                                std::unique_lock<std::shared_mutex> lock(mutex);
+                                player->tile.board.y = context.visual.height - player->sprite.height - 1;
+                                player->tile.board.x = (context.visual.width + 2) / 2;
+                            }
+                        } else {
+                            {
+                                std::unique_lock<std::shared_mutex> lock(mutex);
+                                configuration.status.play = false;
+                                configuration.status.game_over = true;
+                            }
+                        }
                     }
 
                     if (root->tile.board.x >= context.visual.width) {
@@ -107,6 +131,30 @@ void animate(WINDOW* &window, const NODE* root, const NODE* player, const INTERF
                     {
                         std::unique_lock<std::shared_mutex> lock(mutex);
                         root->tile.board.x = root->tile.board.x - root->sprite.width;
+                    }
+
+                    if (root->tile.board.y == player->tile.board.y &&
+                        root->tile.board.x >= player->tile.board.x &&
+                        root->tile.board.x - root->sprite.width <= player->tile.board.x) {
+
+                        if (configuration.environment.lives > 0) {
+                            {
+                                std::unique_lock<std::shared_mutex> lock(mutex);
+                                configuration.environment.lives--;
+                            }
+
+                            {
+                                std::unique_lock<std::shared_mutex> lock(mutex);
+                                player->tile.board.y = context.visual.height - player->sprite.height - 1;
+                                player->tile.board.x = (context.visual.width + 2) / 2;
+                            }
+                        } else {
+                            {
+                                std::unique_lock<std::shared_mutex> lock(mutex);
+                                configuration.status.play = false;
+                                configuration.status.game_over = true;
+                            }
+                        }
                     }
 
                     if (root->tile.board.x <= -root->sprite.width) {
@@ -271,6 +319,7 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
     }
 
     last = create(root, last, tile(SEPARATOR, last->tile.board.y - 1, 0), {});
+    last = create(root, last, tile(SEPARATOR, last->tile.board.y - root->sprite.height - 1, 0), {});
 
     // Save Separator For Fixed Lily Later
     auto separator = last;
@@ -369,7 +418,7 @@ void play(NODE* &root, WINDOW* &window, const INTERFACE &context, const CONFIGUR
                 }
 
                 current->active = true;
-                current->worker = std::thread(animate, std::ref(window), current, root, std::ref(context), cycle);
+                current->worker = std::thread(animate, std::ref(window), current, root, std::ref(context), std::ref(configuration), cycle);
             }
         }
     }
@@ -543,8 +592,8 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                                           current->sprite.symbol[index].c_str());
                             }
 #if DEBUG
-                        mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 3, "%s", std::to_string(current->tile.board.y).c_str());
-                        mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 7, "%s", std::to_string(current->tile.board.x).c_str());
+                            mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 3, "%s", std::to_string(current->tile.board.y).c_str());
+                            mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 7, "%s", std::to_string(current->tile.board.x).c_str());
 #endif
 
                             break;
@@ -592,6 +641,14 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
         wrefresh(window);
     }
 
+    if (configuration.status.game_over) {
+        wclear(window);
+        box(window, 0, 0);
+        wrefresh(window);
+        mvwprintw(window, getmaxy(stdscr) / 2, getmaxx(stdscr) / 2, "%s", "GANE OVER");
+        wrefresh(window);
+    }
+
     for (const NODE* current = root; current != nullptr; current = current->next) {
         if (current->active == true && (current->tile.type == RIGHT_CAR || current->tile.type == LEFT_CAR || current->tile.type == LILY)) {
             {
@@ -604,6 +661,8 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
     }
 
     playing.join();
+
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
     wclear(window);
     wclrtoeol(window);
