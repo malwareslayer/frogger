@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "../src/engine/window.hpp"
+#include "../../src/engine/window.hpp"
 
 struct PROPERTY {
     mutable int choose;

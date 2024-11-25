@@ -2,7 +2,7 @@
  * Copyright 2024 <Team 1 UPH IF 2024>
  */
 
-#include "../src/configuration.hpp"
+#include "../../src/utility/configuration.hpp"
 
 void increase(const CONFIGURATION &configuration, const std::string &label) {
     if (label == "Car") {

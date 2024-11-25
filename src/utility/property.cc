@@ -2,7 +2,7 @@
  * Copyright 2024 <Team 1 UPH IF 2024>
  */
 
-#include "../src/property.hpp"
+#include "../../src/utility/property.hpp"
 
 auto choose(WINDOW *window, const PROPERTY &property, const std::vector<std::string> &labels) -> std::string {
     const int maximum = static_cast<int>(labels.size());
