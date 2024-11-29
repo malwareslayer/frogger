@@ -18,12 +18,28 @@
 std::shared_mutex mutex;
 
 void game(WINDOW* &parent, const CONFIGURATION &configuration) {
+    int height = getmaxy(stdscr);
+
+    if (height % 5 != 0) {
+        height = height - (height % 5);
+    }
+
+    if (height < 55) {
+        exit(-1);
+    }
+
+    int width = getmaxx(stdscr);
+
+    if (width % 10 != 0) {
+        width = width - (width % 10);
+    }
+
     const INTERFACE context = {
         .visual = {
             .y = 0,
             .x = 0,
-            .height = getmaxy(stdscr),
-            .width = getmaxx(stdscr),
+            .height = height,
+            .width = width,
         },
     };
 
@@ -41,7 +57,7 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
     configuration.status.game_over = false;
 
     const SPRITE frog = sprite(LFROG);
-    const TILE player = tile(PLAYER, context.visual.height - frog.height - 1, context.visual.width / 2 + 1);
+    const TILE player = tile(PLAYER, context.visual.height - frog.height - 1, context.visual.width / 2 + 5);
 
     auto root = std::make_shared<NODE>(NODE {
         .index = 1,
@@ -102,9 +118,11 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                             break;
 #endif
                         case LILY:
-                            for (size_t index = 0; index < current->sprite.symbol.size(); index++) {
-                                mvwprintw(window, current->tile.board.y + index, current->tile.board.x, "%s",
-                                          current->sprite.symbol[index].c_str());
+                            if (!current->pause) {
+                                for (size_t index = 0; index < current->sprite.symbol.size(); index++) {
+                                    mvwprintw(window, current->tile.board.y + index, current->tile.board.x, "%s",
+                                              current->sprite.symbol[index].c_str());
+                                }
                             }
                             break;
                         case RIGHT_LOG:
@@ -140,26 +158,32 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
             }
 
             mvwprintw(window, context.visual.height - 1, 0, "%s", "ATAS = KEY UP");
-            mvwprintw(window, context.visual.height - 1, 15, "%s", "BAWAH = KEY DOWN");
-            mvwprintw(window, context.visual.height - 1, 35, "%s", "KANAN = KEY RIGHT");
-            mvwprintw(window, context.visual.height - 1, 55, "%s", "KIRI = KEY LEFT");
+            mvwprintw(window, context.visual.height - 1, 20, "%s", "BAWAH = KEY DOWN");
+            mvwprintw(window, context.visual.height - 1, 40, "%s", "KANAN = KEY RIGHT");
+            mvwprintw(window, context.visual.height - 1, 60, "%s", "KIRI = KEY LEFT");
 
 #if DEBUG
             const int right = total(root, RIGHT_CAR);
 
-            mvwprintw(window, context.visual.height - 1, 100, "%s", "RIGHT CAR = ");
-            mvwprintw(window, context.visual.height - 1, 115, "%s", std::to_string(right).c_str());
+            mvwprintw(window, context.visual.height - 1, 80, "%s", "RIGHT CAR = ");
+            mvwprintw(window, context.visual.height - 1, 92, "%s", std::to_string(right).c_str());
 
             const int left = total(root, LEFT_CAR);
 
-            mvwprintw(window, context.visual.height - 1, 125, "%s", "LEFT CAR = ");
-            mvwprintw(window, context.visual.height - 1, 145, "%s", std::to_string(left).c_str());
+            mvwprintw(window, context.visual.height - 1, 95, "%s", "LEFT CAR = ");
+            mvwprintw(window, context.visual.height - 1, 106, "%s", std::to_string(left).c_str());
 
-            mvwprintw(window, context.visual.height - 1, 155, "%s", "Y = ");
-            mvwprintw(window, context.visual.height - 1, 160, "%s", std::to_string(root->tile.board.y).c_str());
+            mvwprintw(window, context.visual.height - 1, 115, "%s", "Y = ");
+            mvwprintw(window, context.visual.height - 1, 119, "%s", std::to_string(root->tile.board.y).c_str());
 
-            mvwprintw(window, context.visual.height - 1, 165, "%s", "X = ");
-            mvwprintw(window, context.visual.height - 1, 170, "%s", std::to_string(root->tile.board.x).c_str());
+            mvwprintw(window, context.visual.height - 1, 125, "%s", "X = ");
+            mvwprintw(window, context.visual.height - 1, 129, "%s", std::to_string(root->tile.board.x).c_str());
+
+            mvwprintw(window, context.visual.height - 1, 186, "%s", "HEIGHT = ");
+            mvwprintw(window, context.visual.height - 1, 195, "%s", std::to_string(context.visual.height).c_str());
+
+            mvwprintw(window, context.visual.height - 1, 199, "%s", "WIDTH = ");
+            mvwprintw(window, context.visual.height - 1, 207, "%s", std::to_string(context.visual.width).c_str());
 #endif
         }
 
@@ -173,16 +197,27 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
     }
 
     if (configuration.status.game_over) {
+        root->sprite = sprite(DFROG);
+
+        for (size_t index = 0; index < root->sprite.symbol.size(); index++) {
+            mvwprintw(window, root->tile.board.y + index, root->tile.board.x, "%s",
+                      root->sprite.symbol[index].c_str());
+        }
+
+        wrefresh(window);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+
         wclear(window);
         box(window, 0, 0);
         wrefresh(window);
         mvwprintw(window, (getmaxy(stdscr) - 4) / 2, getmaxx(stdscr) / 2, "%s", "GAME OVER");
         wrefresh(window);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     }
 
     playing.join();
-
-    std::this_thread::sleep_for(std::chrono::seconds(3));
 
     wclear(window);
     wclrtoeol(window);

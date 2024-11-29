@@ -36,7 +36,7 @@ auto keypad(WINDOW *window, const INTERFACE &context, const SPRITE &sprite, cons
                 tile.board.x = tile.board.x + sprite.width;
 
                 if (tile.board.x + sprite.width >= context.visual.width) {
-                    tile.board.x = context.visual.width - sprite.width + 2;
+                    tile.board.x = context.visual.width - sprite.width;
                 }
             }
             break;

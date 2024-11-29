@@ -25,7 +25,7 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                             {
                                 std::unique_lock<std::shared_mutex> lock(mutex);
                                 player->tile.board.y = context.visual.height - player->sprite.height - 1;
-                                player->tile.board.x = (context.visual.width + 2) / 2;
+                                player->tile.board.x = context.visual.width / 2;
                             }
                         } else {
                             {
@@ -64,7 +64,7 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                             {
                                 std::unique_lock<std::shared_mutex> lock(mutex);
                                 player->tile.board.y = context.visual.height - player->sprite.height - 1;
-                                player->tile.board.x = (context.visual.width + 2) / 2;
+                                player->tile.board.x = context.visual.width / 2;
                             }
                         } else {
                             {
@@ -78,7 +78,7 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                     if (root->tile.board.x <= -root->sprite.width) {
                         {
                             std::unique_lock<std::shared_mutex> lock(mutex);
-                            root->tile.board.x = context.visual.width - root->sprite.width + 2;
+                            root->tile.board.x = context.visual.width - root->sprite.width;
                         }
                     }
                 }
@@ -148,7 +148,7 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                     if (root->tile.board.x - root->sprite.width < -root->sprite.width) {
                         {
                             std::unique_lock<std::shared_mutex> lock(mutex);
-                            root->tile.board.x = context.visual.width + 2 - root->sprite.width / 2;
+                            root->tile.board.x = context.visual.width - root->sprite.width / 2;
                         }
                     }
                 }

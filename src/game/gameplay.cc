@@ -1,5 +1,6 @@
 #include <mutex>
 #include <random>
+#include <unordered_map>
 
 #include "../../src/game/gameplay.hpp"
 #include "../../src/game/utility.hpp"
@@ -29,8 +30,6 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
                 continue;
             }
 
-            const int random_car = distribution_car(generate);
-
             if (initial != now) {
                 initial = now;
                 break;
@@ -42,7 +41,7 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
 
                     {
                         std::unique_lock<std::shared_mutex> lock(mutex);
-                        for (int j = now + 1; j <= now + random_car; j++) {
+                        for (int j = now + 1; j <= now + distribution_car(generate); j++) {
                             switch (last->tile.type) {
                                 case SEPARATOR:
                                     last = create(last, last, tile(RIGHT_CAR, last->tile.board.y - rcar.height, 0), rcar, false);
@@ -63,16 +62,16 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
 
                     {
                         std::unique_lock<std::shared_mutex> lock(mutex);
-                        for (int j = now + 1; j <= now + random_car; j++) {
+                        for (int j = now + 1; j <= now + distribution_car(generate); j++) {
                             switch (last->tile.type) {
                                 case SEPARATOR:
                                     last = create(last, last, tile(LEFT_CAR, last->tile.board.y - lcar.height, context.visual.width - lcar.width), lcar, false);
                                     break;
                                 case RIGHT_CAR:
-                                    last = create(last, last, tile(LEFT_CAR, last->tile.board.y - lcar.height - 1, context.visual.width + 2), lcar, false);
+                                    last = create(last, last, tile(LEFT_CAR, last->tile.board.y - lcar.height - 1, context.visual.width), lcar, false);
                                     break;
                                 case LEFT_CAR:
-                                    last = create(last, last, tile(LEFT_CAR, last->tile.board.y, context.visual.width + 2 - lcar.width), lcar, false);
+                                    last = create(last, last, tile(LEFT_CAR, last->tile.board.y, last->tile.board.x - lcar.width), lcar, false);
                                     break;
                                 default:
                                     exit(1);
@@ -106,9 +105,13 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
 
     for (size_t i = 1; i <= 4; i++) {
         if (i == 1) {
-            ax = last->tile.board.x + x.width * 2;
+            if (context.visual.width % 10 == 0) {
+                ax = last->tile.board.x + x.width * 1;
+            } else {
+                ax = last->tile.board.x + x.width * 2;
+            }
         } else if (i == 3) {
-            ax = last->tile.board.x + x.width * 5;
+            ax = last->tile.board.x + x.width * 4;
         }else {
             ax = last->tile.board.x + x.width * 3;
         }
@@ -154,7 +157,7 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
         ay = (ay - log.height);
 
         int cx = 0;
-        int dx = context.visual.width + 2 + log.width;
+        int dx = context.visual.width + log.width;
 
         for (size_t j = 1; j <= distribution_log(generate); j++) {
             if (i % 2 != 0) {
@@ -171,20 +174,39 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
         ay = ay - 1;
     }
 
+    std::vector<int> car_speed = {1000, 950, 900, 850, 800};
+    std::uniform_int_distribution<int> distribution_car_defaults(0, car_speed.size() - 1);
+
+    std::unordered_map<int, int> car_default_speed;
+
+    car_default_speed[48] = car_speed[distribution_car_defaults(seed)];
+    car_default_speed[43] = car_speed[distribution_car_defaults(seed)];
+    car_default_speed[38] = car_speed[distribution_car_defaults(seed)];
+    car_default_speed[33] = car_speed[distribution_car_defaults(seed)];
+
     // Activate Object Gameplay
     for (std::shared_ptr<NODE> current = root->next; current != nullptr; current = current->next) {
         if (current->active == false && (current->tile.type != SEPARATOR || current->tile.type != PLAYER || current->tile.type != WATER)) {
             {
                 std::unique_lock<std::shared_mutex> lock(mutex);
 
-                int cycle = 250;
+                current->active = true;
 
-                if (current->tile.type == LEFT_LOG || current->tile.type == RIGHT_LOG) {
-                    cycle = 1250;
+                if (current->tile.type == LEFT_CAR) {
+                    current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), 125);
                 }
 
-                current->active = true;
-                current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), cycle);
+                if (current->tile.type == RIGHT_CAR) {
+                    current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), 125);
+                }
+
+                if (current->tile.type == LILY) {
+                    current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), 500);
+                }
+
+                if (current->tile.type == LEFT_LOG || current->tile.type == RIGHT_LOG) {
+                    current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), 1250);
+                }
             }
         }
     }
