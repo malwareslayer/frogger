@@ -43,13 +43,13 @@ void setting(WINDOW *window, const CONFIGURATION &configuration) {
             }
         } else if (choosing == "KEY_LEFT") {
             if (labeling[context.interface.choose - 1] == "Car") {
-                if (configuration.environment.car > 0) {
+                if (configuration.environment.car > 1) {
                     decrease(configuration, labeling[context.interface.choose - 1]);
                 }
 
                 bar(window, configuration.environment.car, 1, 10);
             } else if (labeling[context.interface.choose - 1] == "Log") {
-                if (configuration.environment.log > 0) {
+                if (configuration.environment.log > 1) {
                     decrease(configuration, labeling[context.interface.choose - 1]);
                 }
 
