@@ -65,5 +65,8 @@ void credit(WINDOW* &parent) {
         start--;
     }
 
+    wclear(window);
+    wrefresh(window);
     werase(window);
+    delwin(window);
 }
