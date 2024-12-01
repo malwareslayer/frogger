@@ -24,9 +24,11 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
         height = height - (height % 5);
     }
 
+#if RELEASE
     if (height < 55) {
         exit(-1);
     }
+#endif
 
     int width = getmaxx(stdscr);
 
@@ -57,7 +59,7 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
     configuration.status.game_over = false;
 
     const SPRITE frog = sprite(LFROG);
-    const TILE player = tile(PLAYER, context.visual.height - frog.height - 1, context.visual.width / 2 + 5);
+    const TILE player = tile(PLAYER, context.visual.height - frog.height - 1, context.visual.width / 2 - 5);
 
     auto root = std::make_shared<NODE>(NODE {
         .index = 1,
@@ -96,8 +98,9 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                                           current->sprite.symbol[index].c_str());
                             }
 #if DEBUG
-                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 3, "%s", std::to_string(current->tile.board.y).c_str());
-                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 7, "%s", std::to_string(current->tile.board.x).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 1, "%s", std::to_string(current->tile.board.y).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 5, "%s", std::to_string(current->tile.board.x).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 9, "%s", std::to_string(current->tile.speed).c_str());
 #endif
                             break;
                         case LEFT_CAR:
@@ -106,8 +109,9 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                                           current->sprite.symbol[index].c_str());
                             }
 #if DEBUG
-                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 3, "%s", std::to_string(current->tile.board.y).c_str());
-                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 7, "%s", std::to_string(current->tile.board.x).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 1, "%s", std::to_string(current->tile.board.y).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 5, "%s", std::to_string(current->tile.board.x).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 9, "%s", std::to_string(current->tile.speed).c_str());
 #endif
                             break;
 #if RELEASE
@@ -131,8 +135,9 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                                           current->sprite.symbol[index].c_str());
                             }
 #if DEBUG
-                            mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 3, "%s", std::to_string(current->tile.board.y).c_str());
-                            mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 7, "%s", std::to_string(current->tile.board.x).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x, "%s", std::to_string(current->tile.board.y).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 4, "%s", std::to_string(current->tile.board.x).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 8, "%s", std::to_string(current->tile.speed).c_str());
 #endif
                             break;
                         case LEFT_LOG:
@@ -141,8 +146,9 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                                           current->sprite.symbol[index].c_str());
                             }
 #if DEBUG
-                            mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 3, "%s", std::to_string(current->tile.board.y).c_str());
-                            mvwprintw(window, current->tile.board.y - 1, current->tile.board.x + 7, "%s", std::to_string(current->tile.board.x).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x, "%s", std::to_string(current->tile.board.y).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 4, "%s", std::to_string(current->tile.board.x).c_str());
+                            mvwprintw(window, current->tile.board.y, current->tile.board.x + 8, "%s", std::to_string(current->tile.speed).c_str());
 #endif
 
                             break;
@@ -215,6 +221,17 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
         wrefresh(window);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    }
+
+    for (std::shared_ptr<NODE> current = root; current != nullptr; current = current->next) {
+        if (current->active == true && (current->tile.type == RIGHT_CAR || current->tile.type == LEFT_CAR || current->tile.type == LILY || current->tile.type == RIGHT_LOG || current->tile.type == LEFT_LOG)) {
+            {
+                std::unique_lock<std::shared_mutex> lock(mutex);
+                current->active = false;
+            }
+
+            current->worker.join();
+        }
     }
 
     playing.join();

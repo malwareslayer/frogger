@@ -10,6 +10,7 @@ struct BOARD {
 struct TILE {
     TYPE type;
     BOARD board;
+    mutable int speed;
 };
 
 auto tile(const TYPE &type, const int &y, const int &x) -> TILE;

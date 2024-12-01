@@ -3,6 +3,9 @@
 #include <unordered_map>
 
 #include "../../src/game/gameplay.hpp"
+
+#include <map>
+
 #include "../../src/game/utility.hpp"
 #include "../../src/game/animation.hpp"
 
@@ -11,6 +14,8 @@
 #include "../../src/game/symbols/log.hpp"
 
 void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window, const INTERFACE &context, const CONFIGURATION &configuration) {
+    configuration.environment.lives = 3;
+
     std::random_device seed;
     std::mt19937 generate(seed());
     std::uniform_int_distribution<int> distribution_car(1, configuration.environment.car);
@@ -94,7 +99,7 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
         last = create(root, last, tile(WATER, last->tile.board.y - 1, 0), {});
     }
 
-    last = create(root, last, tile(SEPARATOR, last->tile.board.y, 0), {});
+    // last = create(root, last, tile(SEPARATOR, last->tile.board.y, 0), {});
 
     // Generate Lily
     const SPRITE x = sprite(LILY_1);
@@ -112,7 +117,7 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
             }
         } else if (i == 3) {
             ax = last->tile.board.x + x.width * 4;
-        }else {
+        } else {
             ax = last->tile.board.x + x.width * 3;
         }
 
@@ -174,15 +179,22 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
         ay = ay - 1;
     }
 
-    std::vector<int> car_speed = {1000, 950, 900, 850, 800};
-    std::uniform_int_distribution<int> distribution_car_defaults(0, car_speed.size() - 1);
+    last = create(root, last, tile(SEPARATOR, last->tile.board.y - 1, 0), {});
 
-    std::unordered_map<int, int> car_default_speed;
+    std::vector<int> car_speeds = { 200, 175, 150, 125, 100 };
+    std::uniform_int_distribution<int> distribution_car_speed(0, car_speeds.size() - 1);
 
-    car_default_speed[48] = car_speed[distribution_car_defaults(seed)];
-    car_default_speed[43] = car_speed[distribution_car_defaults(seed)];
-    car_default_speed[38] = car_speed[distribution_car_defaults(seed)];
-    car_default_speed[33] = car_speed[distribution_car_defaults(seed)];
+    const int first_line_car = car_speeds[distribution_car_speed(generate)];
+    const int second_line_car = car_speeds[distribution_car_speed(generate)];
+    const int third_line_car = car_speeds[distribution_car_speed(generate)];
+    const int fourth_line_car = car_speeds[distribution_car_speed(generate)];
+
+    std::vector<int> log_speeds = { 700, 600, 500, 400, 300 };
+    std::uniform_int_distribution<int> distribution_log_speed(0, log_speeds.size() - 1);
+
+    const int first_line_log = log_speeds[distribution_log_speed(generate)];
+    const int second_line_log = log_speeds[distribution_log_speed(generate)];
+    const int third_line_log = log_speeds[distribution_log_speed(generate)];
 
     // Activate Object Gameplay
     for (std::shared_ptr<NODE> current = root->next; current != nullptr; current = current->next) {
@@ -192,12 +204,29 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
 
                 current->active = true;
 
-                if (current->tile.type == LEFT_CAR) {
-                    current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), 125);
-                }
-
-                if (current->tile.type == RIGHT_CAR) {
-                    current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), 125);
+                if (current->tile.type == LEFT_CAR || current->tile.type == RIGHT_CAR) {
+                    switch (current->tile.board.y) {
+                        case 45:
+                            current->tile.speed = first_line_car;
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), first_line_car);
+                            break;
+                        case 40:
+                            current->tile.speed = second_line_car;
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), second_line_car);
+                            break;
+                        case 35:
+                            current->tile.speed = third_line_car;
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), third_line_car);
+                            break;
+                        case 30:
+                            current->tile.speed = fourth_line_car;
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), fourth_line_car);
+                            break;
+                        default:
+                            current->tile.speed = 125;
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), 125);
+                            break;
+                    }
                 }
 
                 if (current->tile.type == LILY) {
@@ -205,7 +234,22 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
                 }
 
                 if (current->tile.type == LEFT_LOG || current->tile.type == RIGHT_LOG) {
-                    current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), 1250);
+                    switch (current->tile.board.y) {
+                        case 15:
+                            current->tile.speed = first_line_log;
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), first_line_log);
+                            break;
+                        case 10:
+                            current->tile.speed = second_line_log;
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), second_line_log);
+                            break;
+                        case 5:
+                            current->tile.speed = third_line_log;
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), third_line_log);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
@@ -213,6 +257,10 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
 
     // Player Gameplay Interface
     while (configuration.status.play) {
+        if (configuration.status.game_over) {
+            break;
+        }
+
         if (const std::string interface = keypad(window, context, root->sprite, root->tile); interface == "q") {
             break;
         }
@@ -223,6 +271,30 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
                     {
                         std::shared_lock<std::shared_mutex> lock(mutex);
                         if (current->tile.board.y == root->tile.board.y) {
+                            if (current->previous->tile.type != RIGHT_LOG) {
+                                if (current->tile.board.x - current->sprite.width / 2 > root->tile.board.x) {
+                                    if (configuration.environment.lives > 0) {
+                                        configuration.environment.lives--;
+                                        root->tile.board.y = context.visual.height - root->sprite.height - 1;
+                                        root->tile.board.x = context.visual.width / 2 - 5;
+                                    } else {
+                                        configuration.status.game_over = true;
+                                    }
+                                }
+                            }
+
+                            if (current->next->tile.type != RIGHT_LOG) {
+                                if (root->tile.board.x > current->tile.board.x + current->sprite.width / 2) {
+                                    if (configuration.environment.lives > 0) {
+                                        configuration.environment.lives--;
+                                        root->tile.board.y = context.visual.height - root->sprite.height - 1;
+                                        root->tile.board.x = context.visual.width / 2 - 5;
+                                    } else {
+                                        configuration.status.game_over = true;
+                                    }
+                                }
+                            }
+
                             if (current->tile.board.x == root->tile.board.x) {
 #if DEBUG
                                 mvwprintw(window, 0, 0, "%s", std::string("TRIGGERED #1").c_str());
@@ -244,6 +316,30 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
                     {
                         std::shared_lock<std::shared_mutex> lock(mutex);
                         if (current->tile.board.y == root->tile.board.y) {
+                            if (current->previous->tile.type != LEFT_LOG) {
+                                if (current->tile.board.x - current->sprite.width / 2 > root->tile.board.x) {
+                                    if (configuration.environment.lives > 0) {
+                                        configuration.environment.lives--;
+                                        root->tile.board.y = context.visual.height - root->sprite.height - 1;
+                                        root->tile.board.x = context.visual.width / 2 - 5;
+                                    } else {
+                                        configuration.status.game_over = true;
+                                    }
+                                }
+                            }
+
+                            if (current->next->tile.type != LEFT_LOG) {
+                                if (root->tile.board.x > current->tile.board.x + current->sprite.width / 2) {
+                                    if (configuration.environment.lives > 0) {
+                                        configuration.environment.lives--;
+                                        root->tile.board.y = context.visual.height - root->sprite.height - 1;
+                                        root->tile.board.x = context.visual.width / 2 - 5;
+                                    } else {
+                                        configuration.status.game_over = true;
+                                    }
+                                }
+                            }
+
                             if (current->tile.board.x == root->tile.board.x) {
 #if DEBUG
                                 mvwprintw(window, 0, 0, "%s", std::string("TRIGGERED #1").c_str());
@@ -266,17 +362,6 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
-
-    for (std::shared_ptr<NODE> current = root; current != nullptr; current = current->next) {
-        if (current->active == true && (current->tile.type == RIGHT_CAR || current->tile.type == LEFT_CAR || current->tile.type == LILY || current->tile.type == RIGHT_LOG || current->tile.type == LEFT_LOG)) {
-            {
-                std::unique_lock<std::shared_mutex> lock(mutex);
-                current->active = false;
-            }
-
-            current->worker.join();
-        }
     }
 
     // Stop Interface And Make Thread Done

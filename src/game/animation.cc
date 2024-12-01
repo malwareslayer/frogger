@@ -25,12 +25,11 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                             {
                                 std::unique_lock<std::shared_mutex> lock(mutex);
                                 player->tile.board.y = context.visual.height - player->sprite.height - 1;
-                                player->tile.board.x = context.visual.width / 2;
+                                player->tile.board.x = context.visual.width / 2 - 5;
                             }
                         } else {
                             {
                                 std::unique_lock<std::shared_mutex> lock(mutex);
-                                configuration.status.play = false;
                                 configuration.status.game_over = true;
                             }
                         }
@@ -64,12 +63,11 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                             {
                                 std::unique_lock<std::shared_mutex> lock(mutex);
                                 player->tile.board.y = context.visual.height - player->sprite.height - 1;
-                                player->tile.board.x = context.visual.width / 2;
+                                player->tile.board.x = context.visual.width / 2 - 5;
                             }
                         } else {
                             {
                                 std::unique_lock<std::shared_mutex> lock(mutex);
-                                configuration.status.play = false;
                                 configuration.status.game_over = true;
                             }
                         }
@@ -96,7 +94,9 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                         if (previous + player->sprite.width == player->tile.board.x) {
                             {
                                 std::shared_lock<std::shared_mutex> lock(mutex);
-                                player->tile.board.x = player->tile.board.x + player->sprite.width;
+                                if (player->tile.board.x <= context.visual.width - player->sprite.width) {
+                                    player->tile.board.x = player->tile.board.x + player->sprite.width;
+                                }
                             }
                         }
                     }
@@ -140,7 +140,9 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                         std::shared_lock<std::shared_mutex> lock(mutex);
                         if (root->tile.board.y == player->tile.board.y) {
                             if (previous + player->sprite.width == player->tile.board.x) {
-                                player->tile.board.x = player->tile.board.x - player->sprite.width;
+                                if (player->tile.board.x != 0) {
+                                    player->tile.board.x = player->tile.board.x - player->sprite.width;
+                                }
                             }
                         }
                     }
