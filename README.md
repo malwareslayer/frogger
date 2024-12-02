@@ -15,7 +15,7 @@ cmake --build "<ROOT PROJECT>/debug" --target frogger -- -j <N-CORE COMPILE>
 ## Release
 
 ```
-cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S "<ROOT PROJECT>" -B "<ROOT PROJECT>/release"
+cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -S "<ROOT PROJECT>" -B "<ROOT PROJECT>/release"
 ```
 
 ```

@@ -12,7 +12,6 @@
 #include "../../src/game/tile.hpp"
 #include "../../src/game/node.hpp"
 #include "../../src/game/gameplay.hpp"
-#include "../../src/game/utility.hpp"
 
 #include "../../src/game/symbols/frog.hpp"
 
