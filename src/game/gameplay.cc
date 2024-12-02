@@ -1,10 +1,9 @@
+#include <algorithm>
 #include <mutex>
 #include <random>
-#include <unordered_map>
+#include <ranges>
 
 #include "../../src/game/gameplay.hpp"
-
-#include <map>
 
 #include "../../src/game/utility.hpp"
 #include "../../src/game/animation.hpp"
@@ -95,11 +94,11 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
     auto separator = last;
 
     // Generate Water
-    for (size_t i = 1; i <= 5 * root->sprite.height; i++) {
+    for (int i = 1; i <= 5 * root->sprite.height; i++) {
         last = create(root, last, tile(WATER, last->tile.board.y - 1, 0), {});
     }
 
-    // last = create(root, last, tile(SEPARATOR, last->tile.board.y, 0), {});
+    std::vector<int> prefix;
 
     // Generate Lily
     const SPRITE x = sprite(LILY_1);
@@ -108,7 +107,7 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
 
     int ax = 0;
 
-    for (size_t i = 1; i <= 4; i++) {
+    for (int i = 1; i <= 4; i++) {
         if (i == 1) {
             if (context.visual.width % 10 == 0) {
                 ax = last->tile.board.x + x.width * 1;
@@ -144,8 +143,12 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
                 });
 
                 if (j == 1) {
+                    prefix.insert(prefix.end(), ax);
+
                     lily->tile = tile(LILY, separator->tile.board.y - root->sprite.height - 1, ax);
                 } else {
+                    prefix.insert(prefix.end(), last->tile.board.x + x.width);
+
                     lily->tile = tile(LILY, separator->tile.board.y - root->sprite.height - 1, last->tile.board.x + x.width);
                 }
 
@@ -164,7 +167,7 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
         int cx = 0;
         int dx = context.visual.width + log.width;
 
-        for (size_t j = 1; j <= distribution_log(generate); j++) {
+        for (int j = 1; j <= distribution_log(generate); j++) {
             if (i % 2 != 0) {
                 last = create(last, last, tile(RIGHT_LOG, ay, cx), log, false);
 
@@ -195,6 +198,17 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
     const int first_line_log = log_speeds[distribution_log_speed(generate)];
     const int second_line_log = log_speeds[distribution_log_speed(generate)];
     const int third_line_log = log_speeds[distribution_log_speed(generate)];
+
+    std::vector<int> lily_cycles = { 4, 3, 2, 1 };
+    std::uniform_int_distribution<int> distribution_lily_cycle(0, lily_cycles.size() - 1);
+
+    const int first_group_lily = lily_cycles[distribution_lily_cycle(generate)];
+    const int second_group_lily = lily_cycles[distribution_lily_cycle(generate)];
+    const int third_group_lily = lily_cycles[distribution_lily_cycle(generate)];
+    const int fourth_group_lily = lily_cycles[distribution_lily_cycle(generate)];
+
+    int group = 1;
+    int counter = 0;
 
     // Activate Object Gameplay
     for (std::shared_ptr<NODE> current = root->next; current != nullptr; current = current->next) {
@@ -230,7 +244,30 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
                 }
 
                 if (current->tile.type == LILY) {
-                    current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), 500);
+                    counter++;
+
+                    switch (group) {
+                        case 1:
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), first_group_lily);
+                            break;
+                        case 2:
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), second_group_lily);
+                            break;
+                        case 3:
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), third_group_lily);
+                            break;
+                        case 4:
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), fourth_group_lily);
+                            break;
+                        default:
+                            current->worker = std::thread(animate, std::ref(mutex), current, root, std::ref(context), std::ref(configuration), 3000);
+                            break;
+                    }
+
+                    if (counter == 3) {
+                        counter = 0;
+                        group++;
+                    }
                 }
 
                 if (current->tile.type == LEFT_LOG || current->tile.type == RIGHT_LOG) {
@@ -267,6 +304,33 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
 
         for (std::shared_ptr<NODE> current = root->next; current != nullptr; current = current->next) {
             switch (current->tile.type) {
+                case LILY:
+                    {
+                        std::shared_lock<std::shared_mutex> lock(mutex);
+                        if (current->tile.board.y == root->tile.board.y - 1) {
+                            if (std::ranges::find(prefix, root->tile.board.x) != prefix.end()) { // NOLINT
+                                if (current->pause && current->sprite.track == 0) {
+                                    if (configuration.environment.lives > 0) {
+                                        configuration.environment.lives--;
+                                        root->tile.board.y = context.visual.height - root->sprite.height - 1;
+                                        root->tile.board.x = context.visual.width / 2 - 5;
+                                    } else {
+                                        configuration.status.game_over = true;
+                                    }
+                                }
+                            } else {
+                                if (configuration.environment.lives > 0) {
+                                    configuration.environment.lives--;
+                                    root->tile.board.y = context.visual.height - root->sprite.height - 1;
+                                    root->tile.board.x = context.visual.width / 2 - 5;
+                                } else {
+                                    configuration.status.game_over = true;
+                                }
+                            }
+                        }
+                    }
+
+                    break;
                 case RIGHT_LOG:
                     {
                         std::shared_lock<std::shared_mutex> lock(mutex);
@@ -329,7 +393,7 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
                             }
 
                             if (current->next->tile.type != LEFT_LOG) {
-                                if (root->tile.board.x > current->tile.board.x + current->sprite.width / 2) {
+                                if (current->tile.board.x - current->sprite.width / 2 > root->tile.board.x) {
                                     if (configuration.environment.lives > 0) {
                                         configuration.environment.lives--;
                                         root->tile.board.y = context.visual.height - root->sprite.height - 1;
@@ -355,6 +419,7 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
                             }
                         }
                     }
+
                     break;
                 default:
                     break;

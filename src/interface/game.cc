@@ -43,6 +43,9 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
             .height = height,
             .width = width,
         },
+        .interface = {
+            .choose = 0
+        }
     };
 
     wclear(parent);
@@ -88,7 +91,7 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                 if (current->active == true) {
                     switch (current->tile.type) {
                         case SEPARATOR:
-                            for (size_t index = 0; index < context.visual.width; index++) {
+                            for (int index = 0; index < context.visual.width; index++) {
                                 mvwprintw(window, current->tile.board.y, index, "%c", '=');
                             }
                             break;
@@ -116,18 +119,40 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
                             break;
 #if RELEASE
                         case WATER:
-                            for (size_t index = 0; index < context.visual.width; index++) {
+                            for (int index = 0; index < context.visual.width; index++) {
                                 mvwprintw(window, current->tile.board.y, index, "%c", '~');
                             }
                             break;
 #endif
                         case LILY:
                             if (!current->pause) {
-                                for (size_t index = 0; index < current->sprite.symbol.size(); index++) {
-                                    mvwprintw(window, current->tile.board.y + index, current->tile.board.x, "%s",
-                                              current->sprite.symbol[index].c_str());
+                                switch (current->sprite.track) {
+                                    case 1:
+                                        for (size_t index = 0; index < current->sprite.symbol.size(); index++) {
+                                            mvwprintw(window, current->tile.board.y + index, current->tile.board.x, "%s",
+                                                      current->sprite.symbol[index].c_str());
+                                        }
+
+                                        break;
+                                    case 2:
+                                        for (size_t index = 0; index < current->sprite.next->symbol.size(); index++) {
+                                            mvwprintw(window, current->tile.board.y + index, current->tile.board.x, "%s",
+                                                      current->sprite.next->symbol[index].c_str());
+                                        }
+
+                                        break;
+                                    case 3:
+                                        for (size_t index = 0; index < current->sprite.next->next->symbol.size(); index++) {
+                                            mvwprintw(window, current->tile.board.y + index, current->tile.board.x, "%s",
+                                                      current->sprite.next->next->symbol[index].c_str());
+                                        }
+
+                                        break;
+                                    default:
+                                        break;
                                 }
                             }
+
                             break;
                         case RIGHT_LOG:
                             for (size_t index = 0; index < current->sprite.symbol.size(); index++) {

@@ -2,22 +2,27 @@
 
 #include "ncurses.h"
 
-auto main(int argc, char *argv[]) -> int {
+auto main() -> int {
     initscr();
     clear();
     noecho();
     cbreak();
     curs_set(0);
 
-    menu({
+    constexpr auto configuration = CONFIGURATION {
         .status = {
-            .running = true
+            .running = true,
+            .play = false,
+            .game_over = false,
         },
         .environment = {
             .car = 1,
-            .log = 3
-        }
-    });
+            .log = 3,
+            .lives = 3
+        },
+    };
+
+    menu(configuration);
 
     endwin();
     clear();

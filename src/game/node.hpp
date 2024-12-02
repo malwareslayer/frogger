@@ -7,12 +7,12 @@
 #include "../../src/game/tile.hpp"
 
 struct NODE {
-    mutable int index;
+    mutable int index = 0;
     mutable bool active;
     mutable bool pause = false;
-    mutable std::thread worker;
+    mutable std::thread worker = std::thread();
     mutable SPRITE sprite;
-    mutable TILE tile;
+    mutable TILE tile = {};
     mutable std::shared_ptr<NODE> previous = nullptr;
     mutable std::shared_ptr<NODE> next = nullptr;
 };

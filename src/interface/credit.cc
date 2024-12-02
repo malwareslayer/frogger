@@ -39,6 +39,9 @@ void credit(WINDOW* &parent) {
             .height = getmaxy(stdscr),
             .width = getmaxx(stdscr),
         },
+        .interface = {
+            .choose = 0,
+        }
     };
 
     wclear(parent);

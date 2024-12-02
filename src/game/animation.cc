@@ -42,6 +42,7 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                         }
                     }
                 }
+
                 break;
             case LEFT_CAR:
                 if (root->tile.board.x >= 0) {
@@ -80,6 +81,27 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                         }
                     }
                 }
+
+                break;
+            case LILY:
+                {
+                    std::unique_lock<std::shared_mutex> lock(mutex);
+                    root->sprite.track = root->sprite.track + 1;
+                    root->pause = false;
+                }
+
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+
+                if (root->sprite.track == 3) {
+                    {
+                        std::unique_lock<std::shared_mutex> lock(mutex);
+                        root->sprite.track = 0;
+                        root->pause = true;
+                    }
+
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
+
                 break;
             case RIGHT_LOG:
                 if (root->tile.board.x <= context.visual.width) {
@@ -117,6 +139,7 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                         }
                     }
                 }
+
                 break;
             case LEFT_LOG:
                 if (root->tile.board.x >= 0) {
@@ -154,11 +177,14 @@ void animate(std::shared_mutex &mutex, const std::shared_ptr<NODE> &root, const 
                         }
                     }
                 }
+
                 break;
             default:
                 break;
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(cycle));
+        if (root->tile.type != LILY) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(cycle));
+        }
     }
 }

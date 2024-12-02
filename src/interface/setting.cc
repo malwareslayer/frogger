@@ -15,7 +15,9 @@ void setting(WINDOW *window, const CONFIGURATION &configuration) {
     constexpr INTERFACE context = {
         .visual = {
             .y = 10,
-            .x = 30
+            .x = 30,
+            .height = 10,
+            .width = 30,
         },
         .interface = {
             .choose = 1,
