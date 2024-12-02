@@ -91,7 +91,7 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
     last = create(root, last, tile(SEPARATOR, last->tile.board.y - root->sprite.height - 1, 0), {});
 
     // Save Separator For Fixed Lily Later
-    auto separator = last;
+    auto first = last;
 
     // Generate Water
     for (int i = 1; i <= 5 * root->sprite.height; i++) {
@@ -145,11 +145,11 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
                 if (j == 1) {
                     prefix.insert(prefix.end(), ax);
 
-                    lily->tile = tile(LILY, separator->tile.board.y - root->sprite.height - 1, ax);
+                    lily->tile = tile(LILY, first->tile.board.y - root->sprite.height - 1, ax);
                 } else {
                     prefix.insert(prefix.end(), last->tile.board.x + x.width);
 
-                    lily->tile = tile(LILY, separator->tile.board.y - root->sprite.height - 1, last->tile.board.x + x.width);
+                    lily->tile = tile(LILY, first->tile.board.y - root->sprite.height - 1, last->tile.board.x + x.width);
                 }
 
                 last = create(last, last, lily);
@@ -183,6 +183,8 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
     }
 
     last = create(root, last, tile(SEPARATOR, last->tile.board.y - 1, 0), {});
+
+    auto second = last;
 
     std::vector<int> car_speeds = { 200, 175, 150, 125, 100 };
     std::uniform_int_distribution<int> distribution_car_speed(0, car_speeds.size() - 1);
@@ -424,6 +426,12 @@ void play(std::shared_mutex &mutex, std::shared_ptr<NODE> &root, WINDOW* &window
                 default:
                     break;
             }
+        }
+
+        if (root->tile.board.y == second->tile.board.y - root->sprite.height) {
+            configuration.status.game_win = true;
+            configuration.status.last = std::chrono::system_clock::now();
+            break;
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1));

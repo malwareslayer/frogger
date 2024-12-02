@@ -9,11 +9,14 @@ auto main() -> int {
     cbreak();
     curs_set(0);
 
-    constexpr auto configuration = CONFIGURATION {
+    const auto configuration = CONFIGURATION {
         .status = {
             .running = true,
             .play = false,
             .game_over = false,
+            .game_win = false,
+            .now = std::chrono::system_clock::now(),
+            .last = std::chrono::system_clock::now()
         },
         .environment = {
             .car = 1,

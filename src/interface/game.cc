@@ -3,6 +3,7 @@
 #include <thread>
 #include <mutex>
 #include <shared_mutex>
+#include <chrono>
 
 #include "../../src/interface/game.hpp"
 
@@ -60,6 +61,8 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
 
     configuration.status.play = true;
     configuration.status.game_over = false;
+    configuration.status.game_win = false;
+    configuration.status.now = std::chrono::system_clock::now();
 
     const SPRITE frog = sprite(LFROG);
     const TILE player = tile(PLAYER, context.visual.height - frog.height - 1, context.visual.width / 2 - 5);
@@ -243,6 +246,24 @@ void game(WINDOW* &parent, const CONFIGURATION &configuration) {
         box(window, 0, 0);
         wrefresh(window);
         mvwprintw(window, (getmaxy(stdscr) - 4) / 2, getmaxx(stdscr) / 2, "%s", "GAME OVER");
+        wrefresh(window);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    }
+
+    if (configuration.status.game_win) {
+        wrefresh(window);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+
+        wclear(window);
+        box(window, 0, 0);
+        wrefresh(window);
+        mvwprintw(window, (getmaxy(stdscr) - 4) / 2, getmaxx(stdscr) / 2, "%s", "YOU WIN!");
+        wrefresh(window);
+        mvwprintw(window, (getmaxy(stdscr) - 3) / 2, (getmaxx(stdscr) / 2) - 5, "%s", "SCORE: ");
+        wrefresh(window);
+        mvwprintw(window, (getmaxy(stdscr) - 3) / 2, (getmaxx(stdscr) / 2) + 10, "%s", std::to_string(std::chrono::duration_cast<std::chrono::seconds>(configuration.status.last - configuration.status.now).count()).c_str());
         wrefresh(window);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1500));
