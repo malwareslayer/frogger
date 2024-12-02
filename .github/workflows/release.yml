@@ -24,8 +24,11 @@ jobs:
       - name: Configure
         run: cmake -S . -B "release/" -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
 
+      - name: Compile Command
+        run: ln -s release/compile_commands.json .
+
       - name: Build
-        run: make -j$(nproc)
+        run: make -C release/ -j$(nproc)
 
       - name: Draft
         uses: actions/create-release@v1
